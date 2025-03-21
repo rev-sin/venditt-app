@@ -29,7 +29,9 @@ function ProductPage() {
           <React.Fragment key={item.id}>
             {index % 10 === 0 && index !== 0 && (
               <div key={`rec-${index}`} className="recommendation">
-                <h3>{recommendations[(index / 10) % recommendations.length]}</h3>
+                <h3>
+                  {recommendations[(index / 10) % recommendations.length]}
+                </h3>
               </div>
             )}
             <div className="item-card">
