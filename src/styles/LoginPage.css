@@ -1,0 +1,147 @@
+/* ✅ Full-Height Login Page */
+.login-container {
+  display: flex;
+  height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  background: #f4f7fa;
+}
+
+/* ✅ Left Side - Login Form */
+.login-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  padding: 50px;
+  box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  border-radius: 10px 0 0 10px;
+  transition: all 0.3s ease-in-out;
+}
+
+.login-box h2 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.login-box p {
+  color: #555;
+  font-size: 15px;
+}
+
+/* ✅ Error Message */
+.error {
+  color: #d9534f;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+/* ✅ Input Fields */
+.login-box input {
+  width: 85%;
+  padding: 12px;
+  margin: 12px 0;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease-in-out;
+}
+
+.login-box input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* ✅ Login & Signup Buttons */
+.login-box button {
+  width: 88%;
+  padding: 14px;
+  background: #007bff;
+  color: white;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  font-weight: bold;
+}
+
+.login-box button:hover {
+  background: #0056b3;
+  transform: scale(1.03);
+}
+
+.login-box button:active {
+  background: #004494;
+  transform: scale(0.98);
+}
+
+/* ✅ Signup & Toggle Link */
+.toggle-link {
+  margin-top: 15px;
+  font-size: 15px;
+  color: #0056b3;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.toggle-link:hover {
+  text-decoration: underline;
+}
+
+/* ✅ Right Side - Logo Section */
+.login-logo {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #131313, #262728);
+  border-radius: 0 10px 10px 0;
+  transition: all 0.3s ease-in-out;
+}
+
+.login-logo img {
+  width: 55%;
+  animation: fadeIn 1s ease-in-out, pulse 2s infinite alternate;
+}
+
+/* ✅ Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 768px) {
+  .login-container {
+      flex-direction: column;
+  }
+
+  .login-box {
+      flex: none;
+      width: 100%;
+      border-radius: 10px;
+      padding: 30px;
+  }
+
+  .login-logo {
+      display: none;
+  }
+
+  .login-box input {
+      width: 100%;
+  }
+
+  .login-box button {
+      width: 100%;
+  }
+}

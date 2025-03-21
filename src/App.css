@@ -1,0 +1,39 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: #c5d0db;
+  color: white;
+}
+
+nav h2 {
+  margin: 0;
+}
+
+nav div a {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  background-color: #d3dae2;
+}
+
+.bottom-nav a {
+  color: white;
+  text-decoration: none;
+}

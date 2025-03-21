@@ -1,0 +1,82 @@
+/* ✅ Container */
+.recent-history-container {
+  text-align: center;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+/* ✅ Title */
+.recent-history-container h2 {
+  color: #222;
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+/* ✅ No Transactions Message */
+.no-transactions {
+  font-size: 16px;
+  color: #888;
+  margin-top: 20px;
+}
+
+/* ✅ Full Visibility for Transactions */
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* ✅ Individual Transaction Box */
+.transaction-item {
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+/* ✅ Transaction Text */
+.transaction-item p {
+  color: #333;
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.transaction-item strong {
+  color: #000;
+}
+
+/* ✅ QR Code Box - Adjusted for Full Visibility */
+.qr-code-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ Remove Blue Scrollbar */
+.transaction-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* ✅ Maintain Bottom Space */
+.bottom-space {
+  height: 3cm;
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 480px) {
+  .recent-history-container {
+    width: 95%;
+  }
+}
