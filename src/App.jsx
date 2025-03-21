@@ -18,7 +18,6 @@ function App() {
   return (
     <CartProvider>  {/* ✅ Wrap CartProvider correctly */}
       <Navbar />
-      <h1>Hi</h1>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
