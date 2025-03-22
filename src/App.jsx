@@ -13,11 +13,14 @@ import { CartProvider } from "./context/CartContext";
 import Cart from "./pages/Cart";
 import Payment from "./pages/Payment";
 import ForgotPassword from "./pages/ForgotPassword";
+import AdminProducts from "./pages/AdminProducts";
 import "./App.css";
 
 function App() {
   return (
-    <CartProvider>  {/* ✅ Wrap CartProvider correctly */}
+    <CartProvider>
+      {" "}
+      {/* ✅ Wrap CartProvider correctly */}
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -31,6 +34,7 @@ function App() {
         <Route path="/location" element={<Location />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/payment" element={<Payment />} />
+        <Route path="/adminProducts" element={<AdminProducts />} />
       </Routes>
       <BottomNav />
     </CartProvider>
