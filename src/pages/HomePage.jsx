@@ -44,7 +44,6 @@ function HomePage() {
     return () => unsubscribe();
   }, []);
 
-
   useEffect(() => {
     const fetchLocation = async () => {
       const storedLocation = localStorage.getItem("selectedLocation");
@@ -67,20 +66,16 @@ function HomePage() {
   
               if (data.status === "OK" && data.results.length > 0) {
                 const formattedAddress = data.results[0].formatted_address;
-                console.log("Location Fetched:", formattedAddress); // Debugging
                 setCurrentLocation(formattedAddress);
                 localStorage.setItem("selectedLocation", formattedAddress);
               } else {
-                console.error("Google API Error:", data);
                 setCurrentLocation("Location not found");
               }
             } catch (error) {
-              console.error("Fetch Error:", error);
               setCurrentLocation("Error fetching location");
             }
           },
           (error) => {
-            console.error("Geolocation Error:", error);
             setCurrentLocation("Location access denied");
           }
         );
@@ -91,9 +86,6 @@ function HomePage() {
   
     fetchLocation();
   }, []);
-  
-
-
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -134,11 +126,12 @@ function HomePage() {
             {user ? (
               <>
                 <div className="profile-icon">
-                  {username.charAt(0).toUpperCase()}
+                  {username ? username.charAt(0).toUpperCase() : "U"}
                 </div>
                 {showDropdown && (
                   <div className="dropdown-menu">
-                    <p>Welcome, {username} 👋</p>
+                    <p>Welcome, {username ? username : "User"} 👋</p>
+                    <button onClick={() => navigate("/profile")}>Profile</button>
                     <button onClick={handleLogout}>Logout</button>
                   </div>
                 )}
