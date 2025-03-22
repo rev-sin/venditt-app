@@ -12,6 +12,7 @@ import BottomNav from "./components/BottomNav";
 import { CartProvider } from "./context/CartContext";
 import Cart from "./pages/Cart";
 import Payment from "./pages/Payment";
+import ForgotPassword from "./pages/ForgotPassword";
 import "./App.css";
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/products" element={<ProductPage />} />
         <Route path="/locate" element={<LocateVending />} />
         <Route path="/offers" element={<OffersRewards />} />

@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { auth, db } from "../firebaseConfig"; // ✅ Ensure db is imported
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  sendEmailVerification, 
-  onAuthStateChanged 
+import { auth, db } from "../firebaseConfig";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +21,6 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ Fix: Delay navigation after auth state change to prevent race conditions
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user && user.emailVerified) {
@@ -51,19 +50,17 @@ function LoginPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // ✅ Save user details in Firestore
       await setDoc(doc(db, "users", user.uid), {
         name,
         email,
         uid: user.uid,
       });
 
-      // ✅ Send email verification
       await sendEmailVerification(user);
       setSuccessMessage("✅ Registration successful! Please check your email for verification.");
       setLoading(false);
     } catch (err) {
-      setError(`⚠️ ${err.message.replace("Firebase:", "").trim()}`); // ✅ Clean up error messages
+      setError(`⚠️ ${err.message.replace("Firebase:", "").trim()}`);
       setLoading(false);
     }
   };
@@ -126,6 +123,9 @@ function LoginPage() {
               <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
               <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
               <button type="submit" disabled={loading}>{loading ? "Logging in..." : "Login"}</button>
+              <p className="forgot-password" onClick={() => navigate("/forgot-password")}>
+                Forgot Password?
+              </p>
               <p className="toggle-link" onClick={() => setIsSignUp(true)}>New user? Sign up</p>
             </form>
           </>
