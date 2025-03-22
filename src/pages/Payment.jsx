@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
 
@@ -28,14 +28,18 @@ const Payment = () => {
           setShowQR(true); // ✅ Show QR Code after payment
 
           // ✅ Store payment in local storage (for RecentHistory.jsx)
-          const transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+          const transactions =
+            JSON.parse(localStorage.getItem("transactions")) || [];
           const newTransaction = {
             amount: amount,
             paymentId: response.razorpay_payment_id,
             date: new Date().toISOString(),
             qrCode: response.razorpay_payment_id, // ✅ Store QR code value
           };
-          localStorage.setItem("transactions", JSON.stringify([...transactions, newTransaction]));
+          localStorage.setItem(
+            "transactions",
+            JSON.stringify([...transactions, newTransaction])
+          );
 
           // ✅ Redirect to Home after 10 seconds
           setTimeout(() => {

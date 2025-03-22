@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 const OrderDetails = () => {
@@ -18,9 +18,15 @@ const OrderDetails = () => {
   return (
     <div>
       <h2>Order Details</h2>
-      <p><strong>Order ID:</strong> {order.id}</p>
-      <p><strong>Date:</strong> {order.date}</p>
-      <p><strong>Total Amount:</strong> ₹{order.total}</p>
+      <p>
+        <strong>Order ID:</strong> {order.id}
+      </p>
+      <p>
+        <strong>Date:</strong> {order.date}
+      </p>
+      <p>
+        <strong>Total Amount:</strong> ₹{order.total}
+      </p>
       <h3>Items:</h3>
       <ul>
         {order.items.map((item) => (

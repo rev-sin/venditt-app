@@ -41,11 +41,11 @@ function ForgotPassword() {
         {message && <p className="success">{message}</p>}
 
         <form onSubmit={handleReset}>
-          <input 
-            type="email" 
-            placeholder="Enter your email" 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <button type="submit" disabled={loading}>
             {loading ? "Sending..." : "Send Reset Link"}

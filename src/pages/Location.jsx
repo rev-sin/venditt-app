@@ -11,7 +11,13 @@ const containerStyle = {
 function Location() {
   const [location, setLocation] = useState(null);
   const [error, setError] = useState(null);
-  const [address, setAddress] = useState({ name: "", house: "", street: "", phone: "", type: "Home" });
+  const [address, setAddress] = useState({
+    name: "",
+    house: "",
+    street: "",
+    phone: "",
+    type: "Home",
+  });
   const [savedAddresses, setSavedAddresses] = useState([]);
   const navigate = useNavigate();
 
@@ -45,7 +51,10 @@ function Location() {
     }
     const newAddress = { ...address };
     setSavedAddresses([...savedAddresses, newAddress]);
-    localStorage.setItem("savedAddresses", JSON.stringify([...savedAddresses, newAddress]));
+    localStorage.setItem(
+      "savedAddresses",
+      JSON.stringify([...savedAddresses, newAddress])
+    );
     setAddress({ name: "", house: "", street: "", phone: "", type: "Home" });
   };
 
@@ -53,10 +62,16 @@ function Location() {
     <LoadScript googleMapsApiKey="AIzaSyD6oR6e-7GCylEFsGhv5LZqQMB27N28j38">
       <div className="location-page">
         <div className="top-bar">
-          <input type="text" placeholder="Search for a location..." className="search-bar" />
+          <input
+            type="text"
+            placeholder="Search for a location..."
+            className="search-bar"
+          />
           <div className="saved-addresses">
             {savedAddresses.map((addr, index) => (
-              <div key={index} className="saved-address">{addr.name || addr.type}</div>
+              <div key={index} className="saved-address">
+                {addr.name || addr.type}
+              </div>
             ))}
           </div>
         </div>
@@ -65,7 +80,11 @@ function Location() {
             {error ? (
               <p>{error}</p>
             ) : location ? (
-              <GoogleMap mapContainerStyle={containerStyle} center={location} zoom={15}>
+              <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={location}
+                zoom={15}
+              >
                 <Marker position={location} />
               </GoogleMap>
             ) : (
@@ -74,17 +93,52 @@ function Location() {
           </div>
           <div className="address-form">
             <h3>Enter Address Details</h3>
-            <input type="text" placeholder="Name" value={address.name} onChange={(e) => setAddress({ ...address, name: e.target.value })} />
-            <input type="text" placeholder="House No." value={address.house} onChange={(e) => setAddress({ ...address, house: e.target.value })} />
-            <input type="text" placeholder="Street" value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} />
-            <input type="text" placeholder="Phone No." value={address.phone} onChange={(e) => setAddress({ ...address, phone: e.target.value })} />
-            <select value={address.type} onChange={(e) => setAddress({ ...address, type: e.target.value })}>
+            <input
+              type="text"
+              placeholder="Name"
+              value={address.name}
+              onChange={(e) => setAddress({ ...address, name: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="House No."
+              value={address.house}
+              onChange={(e) =>
+                setAddress({ ...address, house: e.target.value })
+              }
+            />
+            <input
+              type="text"
+              placeholder="Street"
+              value={address.street}
+              onChange={(e) =>
+                setAddress({ ...address, street: e.target.value })
+              }
+            />
+            <input
+              type="text"
+              placeholder="Phone No."
+              value={address.phone}
+              onChange={(e) =>
+                setAddress({ ...address, phone: e.target.value })
+              }
+            />
+            <select
+              value={address.type}
+              onChange={(e) => setAddress({ ...address, type: e.target.value })}
+            >
               <option value="Home">Home</option>
               <option value="Work">Work</option>
               <option value="Other">Other</option>
             </select>
             {address.type === "Other" && (
-              <input type="text" placeholder="Custom Label" onChange={(e) => setAddress({ ...address, type: e.target.value })} />
+              <input
+                type="text"
+                placeholder="Custom Label"
+                onChange={(e) =>
+                  setAddress({ ...address, type: e.target.value })
+                }
+              />
             )}
             <button onClick={handleSaveAddress}>Save Address</button>
             <button onClick={() => navigate("/")}>Back to Home</button>

@@ -47,7 +47,11 @@ function LoginPage() {
 
     try {
       setLoading(true);
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
 
       await setDoc(doc(db, "users", user.uid), {
@@ -57,7 +61,9 @@ function LoginPage() {
       });
 
       await sendEmailVerification(user);
-      setSuccessMessage("✅ Registration successful! Please check your email for verification.");
+      setSuccessMessage(
+        "✅ Registration successful! Please check your email for verification."
+      );
       setLoading(false);
     } catch (err) {
       setError(`⚠️ ${err.message.replace("Firebase:", "").trim()}`);
@@ -77,7 +83,11 @@ function LoginPage() {
 
     try {
       setLoading(true);
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
 
       if (!user.emailVerified) {
@@ -93,6 +103,7 @@ function LoginPage() {
     } catch (err) {
       setError("⚠️ Invalid login credentials.");
       setLoading(false);
+      console.error(err);
     }
   };
 
@@ -105,12 +116,36 @@ function LoginPage() {
             {error && <p className="error">{error}</p>}
             {successMessage && <p className="success">{successMessage}</p>}
             <form onSubmit={handleSignUp}>
-              <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
-              <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-              <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-              <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-              <button type="submit" disabled={loading}>{loading ? "Processing..." : "Sign Up"}</button>
-              <p className="toggle-link" onClick={() => setIsSignUp(false)}>Already have an account? Login</p>
+              <input
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <button type="submit" disabled={loading}>
+                {loading ? "Processing..." : "Sign Up"}
+              </button>
+              <p className="toggle-link" onClick={() => setIsSignUp(false)}>
+                Already have an account? Login
+              </p>
             </form>
           </>
         ) : (
@@ -120,13 +155,30 @@ function LoginPage() {
             {error && <p className="error">{error}</p>}
             {successMessage && <p className="success">{successMessage}</p>}
             <form onSubmit={handleLogin}>
-              <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-              <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-              <button type="submit" disabled={loading}>{loading ? "Logging in..." : "Login"}</button>
-              <p className="forgot-password" onClick={() => navigate("/forgot-password")}>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button type="submit" disabled={loading}>
+                {loading ? "Logging in..." : "Login"}
+              </button>
+              <p
+                className="forgot-password"
+                onClick={() => navigate("/forgot-password")}
+              >
                 Forgot Password?
               </p>
-              <p className="toggle-link" onClick={() => setIsSignUp(true)}>New user? Sign up</p>
+              <p className="toggle-link" onClick={() => setIsSignUp(true)}>
+                New user? Sign up
+              </p>
             </form>
           </>
         )}

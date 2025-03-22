@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../firebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import vendittLogo from "../assets/venditt-logo.png";
 import "../styles/ProfilePage.css";
 
@@ -28,11 +28,6 @@ const ProfilePage = () => {
 
     return () => unsubscribe();
   }, [navigate]);
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate("/login");
-  };
 
   const handleProfileUpdate = async () => {
     if (!user) return;

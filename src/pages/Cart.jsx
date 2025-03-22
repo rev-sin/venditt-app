@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import "../styles/Cart.css";
@@ -27,8 +27,13 @@ const Cart = () => {
     })
     .filter(Boolean);
 
-  const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalDiscount = cartItems.reduce((sum, item) => sum + (item.price * 0.1 * item.quantity), 0) + discount;
+  const totalAmount = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const totalDiscount =
+    cartItems.reduce((sum, item) => sum + item.price * 0.1 * item.quantity, 0) +
+    discount;
   const finalAmount = totalAmount - totalDiscount;
 
   const applyCoupon = (code) => {
@@ -84,7 +89,9 @@ const Cart = () => {
               <img src={item.image} alt={item.name} className="cart-image" />
               <div className="cart-details">
                 <p className="cart-name">{item.name}</p>
-                <p className="cart-price">₹{item.price} x {item.quantity}</p>
+                <p className="cart-price">
+                  ₹{item.price} x {item.quantity}
+                </p>
               </div>
               <div className="counter">
                 <button onClick={() => removeFromCart(item.id)}>-</button>
@@ -95,30 +102,45 @@ const Cart = () => {
           ))}
 
           <div className="coupon-section">
-            <div className="coupon-bar" onClick={() => setShowCoupons(!showCoupons)}>
+            <div
+              className="coupon-bar"
+              onClick={() => setShowCoupons(!showCoupons)}
+            >
               <span>💲 View Coupons & Offers</span>
             </div>
             {showCoupons && (
               <div className="coupon-dropdown">
-                <input 
-                  type="text" 
-                  placeholder="Enter coupon code" 
-                  value={couponCode} 
+                <input
+                  type="text"
+                  placeholder="Enter coupon code"
+                  value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
                 />
                 <button onClick={() => applyCoupon(couponCode)}>Apply</button>
                 {couponError && <p className="error-message">{couponError}</p>}
                 <div className="available-coupons">
                   <h4>Available Coupons</h4>
-                  <button onClick={() => applyCoupon("Trynew")} className="coupon-button">Trynew - ₹100 off</button>
-                  <button onClick={() => applyCoupon("Gpay")} className="coupon-button">Gpay - ₹50 off</button>
+                  <button
+                    onClick={() => applyCoupon("Trynew")}
+                    className="coupon-button"
+                  >
+                    Trynew - ₹100 off
+                  </button>
+                  <button
+                    onClick={() => applyCoupon("Gpay")}
+                    className="coupon-button"
+                  >
+                    Gpay - ₹50 off
+                  </button>
                 </div>
               </div>
             )}
             {appliedCoupon && (
               <div className="applied-coupon">
                 <span>✅ {appliedCoupon}</span>
-                <button onClick={removeCoupon} className="remove-coupon">Remove</button>
+                <button onClick={removeCoupon} className="remove-coupon">
+                  Remove
+                </button>
               </div>
             )}
           </div>
@@ -130,16 +152,25 @@ const Cart = () => {
                 <div key={item.id} className="offer-card">
                   <img src={item.image} alt={item.name} />
                   <h4>{item.name}</h4>
-                  <span className="offer-price">₹{item.price} <s>₹{(item.price * 1.3).toFixed(2)}</s></span>
+                  <span className="offer-price">
+                    ₹{item.price} <s>₹{(item.price * 1.3).toFixed(2)}</s>
+                  </span>
                   <div className="counter">
                     {cart[item.id] ? (
                       <>
-                        <button onClick={() => removeFromCart(item.id)}>-</button>
+                        <button onClick={() => removeFromCart(item.id)}>
+                          -
+                        </button>
                         <span>{cart[item.id]}</span>
                         <button onClick={() => addToCart(item)}>+</button>
                       </>
                     ) : (
-                      <button className="add-offer-btn" onClick={() => addToCart(item)}>Add</button>
+                      <button
+                        className="add-offer-btn"
+                        onClick={() => addToCart(item)}
+                      >
+                        Add
+                      </button>
                     )}
                   </div>
                 </div>
@@ -154,8 +185,13 @@ const Cart = () => {
             <h3>Total: ₹{finalAmount.toFixed(2)}</h3>
           </div>
 
-          <button className="checkout-button" onClick={() => navigate("/payment", { state: { amount: finalAmount } })}>
-          Pay ₹{finalAmount.toFixed(2)}
+          <button
+            className="checkout-button"
+            onClick={() =>
+              navigate("/payment", { state: { amount: finalAmount } })
+            }
+          >
+            Pay ₹{finalAmount.toFixed(2)}
           </button>
         </>
       )}
