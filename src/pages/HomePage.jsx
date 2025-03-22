@@ -11,8 +11,12 @@ import logoImage from "../assets/venditt-logo.png";
 import "../styles/HomePage.css";
 
 function HomePage() {
-  const [showSplash, setShowSplash] = useState(!localStorage.getItem("visited"));
-  const [currentLocation, setCurrentLocation] = useState("Fetching location...");
+  const [showSplash, setShowSplash] = useState(
+    !localStorage.getItem("visited")
+  );
+  const [currentLocation, setCurrentLocation] = useState(
+    "Fetching location..."
+  );
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -51,19 +55,19 @@ function HomePage() {
         setCurrentLocation(storedLocation);
         return;
       }
-  
+
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
-  
+
             try {
               const response = await fetch(
                 `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyD6oR6e-7GCylEFsGhv5LZqQMB27N28j38`
               );
               const data = await response.json();
-  
+
               if (data.status === "OK" && data.results.length > 0) {
                 const formattedAddress = data.results[0].formatted_address;
                 setCurrentLocation(formattedAddress);
@@ -73,17 +77,19 @@ function HomePage() {
               }
             } catch (error) {
               setCurrentLocation("Error fetching location");
+              console.log(error);
             }
           },
           (error) => {
             setCurrentLocation("Location access denied");
+            console.log(error);
           }
         );
       } else {
         setCurrentLocation("Geolocation not supported");
       }
     };
-  
+
     fetchLocation();
   }, []);
 
@@ -118,7 +124,7 @@ function HomePage() {
             <img alt="Cart" className="cart-icon" />
           </Link>
 
-          <div 
+          <div
             className="user-container"
             onMouseEnter={() => setShowDropdown(true)}
             onMouseLeave={() => setShowDropdown(false)}
@@ -131,7 +137,9 @@ function HomePage() {
                 {showDropdown && (
                   <div className="dropdown-menu">
                     <p>Welcome, {username ? username : "User"} 👋</p>
-                    <button onClick={() => navigate("/profile")}>Profile</button>
+                    <button onClick={() => navigate("/profile")}>
+                      Profile
+                    </button>
                     <button onClick={handleLogout}>Logout</button>
                   </div>
                 )}
@@ -149,8 +157,12 @@ function HomePage() {
         <h1>Find & Enjoy Your Favorite Snacks</h1>
         <p>Instant vending at your fingertips.</p>
         <div className="hero-buttons">
-          <Link to="/products" className="btn hover-effect">Explore Products</Link>
-          <Link to="/locate" className="btn hover-effect">Find Machines</Link>
+          <Link to="/products" className="btn hover-effect">
+            Explore Products
+          </Link>
+          <Link to="/locate" className="btn hover-effect">
+            Find Machines
+          </Link>
         </div>
       </header>
 
@@ -176,14 +188,21 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="offers" onClick={() => window.location.href='/offers'}>
+      <section
+        className="offers"
+        onClick={() => (window.location.href = "/offers")}
+      >
         <h2>Top Deals for You</h2>
         <p>Save more on your favorite vending options.</p>
       </section>
 
       <nav className="bottom-nav">
-        <Link to="/profile" className="bottom-nav-item">Profile</Link>
-        <Link to="/history" className="bottom-nav-item">History</Link>
+        <Link to="/profile" className="bottom-nav-item">
+          Profile
+        </Link>
+        <Link to="/history" className="bottom-nav-item">
+          History
+        </Link>
       </nav>
     </div>
   );
