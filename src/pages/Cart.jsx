@@ -1,200 +1,200 @@
-import { useState } from "react";
-import { useCart } from "../context/CartContext";
-import { useNavigate } from "react-router-dom";
-import "../styles/Cart.css";
-
-const items = Array.from({ length: 100 }, (_, i) => ({
-  id: i + 1,
-  name: `Product ${i + 1}`,
-  price: Math.floor(Math.random() * 1000) + 100,
-  image: "https://via.placeholder.com/150",
-}));
+import { useEffect, useState } from "react";
+import { db } from "../firebaseConfig";
+import {
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
 
 const Cart = () => {
-  const { cart, addToCart, removeFromCart } = useCart();
-  const navigate = useNavigate();
-  const [discount, setDiscount] = useState(0);
-  const [couponCode, setCouponCode] = useState("");
-  const [couponError, setCouponError] = useState("");
-  const [showCoupons, setShowCoupons] = useState(false);
-  const [appliedCoupon, setAppliedCoupon] = useState("");
-  const [showPopup, setShowPopup] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState("");
+  const [quantities, setQuantities] = useState({});
+  const [cartItems, setCartItems] = useState([]);
 
-  const cartItems = Object.keys(cart)
-    .map((id) => {
-      const item = items.find((item) => item.id === Number(id));
-      return item ? { ...item, quantity: cart[id] } : null;
-    })
-    .filter(Boolean);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        const user = querySnapshot.docs[0]; // Replace with logic to get the correct user
+        if (user) {
+          setUserId(user.id);
+        }
 
-  const totalAmount = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+        const productSnapshot = await getDocs(collection(db, "products"));
+        const items = productSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setProducts(items);
+
+        if (user) {
+          const cartRef = doc(db, "carts", user.id);
+          const cartSnap = await getDoc(cartRef);
+          if (cartSnap.exists()) {
+            const cartData = cartSnap.data();
+            const quantities = {};
+            cartData.items.forEach((item) => {
+              quantities[item.productId] = item.quantity;
+            });
+            setQuantities(quantities);
+            setCartItems(cartData.items);
+          }
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleQuantityChange = async (productId, quantity) => {
+    setQuantities((prevQuantities) => ({
+      ...prevQuantities,
+      [productId]: quantity,
+    }));
+
+    if (!userId) {
+      console.error("User ID not found");
+      return;
+    }
+
+    const cartRef = doc(db, "carts", userId);
+    const cartSnap = await getDoc(cartRef);
+
+    if (cartSnap.exists()) {
+      const existingItems = cartSnap.data().items || [];
+      const updatedItems = existingItems.map((item) =>
+        item.productId === productId ? { ...item, quantity: quantity } : item
+      );
+      await updateDoc(cartRef, {
+        items: updatedItems,
+        totalPrice: updatedItems.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0
+        ),
+      });
+    }
+  };
+
+  const handleRemoveFromCart = async (productId) => {
+    if (!userId) {
+      console.error("User ID not found");
+      return;
+    }
+
+    const cartRef = doc(db, "carts", userId);
+    const cartSnap = await getDoc(cartRef);
+
+    if (cartSnap.exists()) {
+      const existingItems = cartSnap.data().items || [];
+      const updatedItems = existingItems.filter(
+        (item) => item.productId !== productId
+      );
+      await updateDoc(cartRef, {
+        items: updatedItems,
+        totalPrice: updatedItems.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0
+        ),
+      });
+      setCartItems(updatedItems);
+      setQuantities((prevQuantities) => {
+        const newQuantities = { ...prevQuantities };
+        delete newQuantities[productId];
+        return newQuantities;
+      });
+    }
+  };
+
+  const totalPrice = cartItems.reduce(
+    (total, item) => total + item.price * item.quantity,
     0
   );
-  const totalDiscount =
-    cartItems.reduce((sum, item) => sum + item.price * 0.1 * item.quantity, 0) +
-    discount;
-  const finalAmount = totalAmount - totalDiscount;
 
-  const applyCoupon = (code) => {
-    if (appliedCoupon) {
-      setCouponError("Only one coupon can be applied at a time.");
-      return;
-    }
-
-    let appliedDiscount = 0;
-    if (code === "Trynew") {
-      appliedDiscount = 100;
-      setAppliedCoupon("Trynew - ₹100 off");
-    } else if (code === "Gpay") {
-      appliedDiscount = 50;
-      setAppliedCoupon("Gpay - ₹50 off");
-    } else if (code === "newuser") {
-      appliedDiscount = 150;
-      setAppliedCoupon("newuser - ₹150 off");
-    } else {
-      setDiscount(0);
-      setAppliedCoupon("");
-      setCouponError("Invalid coupon");
-      return;
-    }
-
-    setDiscount(appliedDiscount);
-    setCouponError("");
-    setShowPopup(true);
-    setTimeout(() => setShowPopup(false), 3000); // Hide popup after 3 seconds
-  };
-
-  const removeCoupon = () => {
-    setDiscount(0);
-    setAppliedCoupon("");
-    setCouponCode("");
-  };
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div className="cart-container">
-      {showPopup && <div className="coupon-popup">🎉 Yay! Coupon Applied</div>}
-
-      <div className="cart-header">
-        <h2>Your Cart</h2>
-        <span className="saved-amount">SAVED ₹{totalDiscount.toFixed(2)}</span>
-      </div>
-
-      {cartItems.length === 0 ? (
-        <p>Your cart is empty</p>
-      ) : (
-        <>
-          {cartItems.map((item) => (
-            <div key={item.id} className="cart-item">
-              <img src={item.image} alt={item.name} className="cart-image" />
-              <div className="cart-details">
-                <p className="cart-name">{item.name}</p>
-                <p className="cart-price">
-                  ₹{item.price} x {item.quantity}
-                </p>
-              </div>
-              <div className="counter">
-                <button onClick={() => removeFromCart(item.id)}>-</button>
-                <span>{item.quantity}</span>
-                <button onClick={() => addToCart(item)}>+</button>
-              </div>
-            </div>
-          ))}
-
-          <div className="coupon-section">
-            <div
-              className="coupon-bar"
-              onClick={() => setShowCoupons(!showCoupons)}
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-4">Cart</h1>
+      <ul className="list-none p-0">
+        {cartItems.map((cartItem) => {
+          const product = products.find((p) => p.id === cartItem.productId);
+          return (
+            <li
+              key={cartItem.productId}
+              className="border rounded-lg p-4 shadow-lg mb-4 bg-white"
             >
-              <span>💲 View Coupons & Offers</span>
-            </div>
-            {showCoupons && (
-              <div className="coupon-dropdown">
+              <h2 className="text-xl font-semibold mb-2">{product.name}</h2>
+              <p className="text-gray-700 mb-1">
+                Description: {product.description}
+              </p>
+              <p className="text-gray-700 mb-1">Price: ${product.price}</p>
+              <p className="text-gray-700 mb-1">Stock: {product.stock}</p>
+              <p className="text-gray-700 mb-1">
+                Available: {product.isAvailable ? "Yes" : "No"}
+              </p>
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="w-24 h-auto mt-2 rounded"
+              />
+              <div className="flex items-center mb-2">
+                <button
+                  className="bg-gray-300 text-gray-700 px-2 py-1 rounded-l hover:bg-gray-400"
+                  onClick={() =>
+                    handleQuantityChange(
+                      cartItem.productId,
+                      Math.max((quantities[cartItem.productId] || 1) - 1, 1)
+                    )
+                  }
+                  disabled={quantities[cartItem.productId] <= 1}
+                >
+                  -
+                </button>
                 <input
                   type="text"
-                  placeholder="Enter coupon code"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
+                  className="w-12 text-center border-t border-b border-gray-300"
+                  value={quantities[cartItem.productId] || 1}
+                  onChange={(e) =>
+                    handleQuantityChange(
+                      cartItem.productId,
+                      parseInt(e.target.value) || 1
+                    )
+                  }
                 />
-                <button onClick={() => applyCoupon(couponCode)}>Apply</button>
-                {couponError && <p className="error-message">{couponError}</p>}
-                <div className="available-coupons">
-                  <h4>Available Coupons</h4>
-                  <button
-                    onClick={() => applyCoupon("Trynew")}
-                    className="coupon-button"
-                  >
-                    Trynew - ₹100 off
-                  </button>
-                  <button
-                    onClick={() => applyCoupon("Gpay")}
-                    className="coupon-button"
-                  >
-                    Gpay - ₹50 off
-                  </button>
-                </div>
-              </div>
-            )}
-            {appliedCoupon && (
-              <div className="applied-coupon">
-                <span>✅ {appliedCoupon}</span>
-                <button onClick={removeCoupon} className="remove-coupon">
-                  Remove
+                <button
+                  className="bg-gray-300 text-gray-700 px-2 py-1 rounded-r hover:bg-gray-400"
+                  onClick={() =>
+                    handleQuantityChange(
+                      cartItem.productId,
+                      (quantities[cartItem.productId] || 1) + 1
+                    )
+                  }
+                >
+                  +
                 </button>
               </div>
-            )}
-          </div>
-
-          <div className="special-offers">
-            <h3>🎉 Special Offers For You</h3>
-            <div className="offer-list">
-              {items.slice(5, 10).map((item) => (
-                <div key={item.id} className="offer-card">
-                  <img src={item.image} alt={item.name} />
-                  <h4>{item.name}</h4>
-                  <span className="offer-price">
-                    ₹{item.price} <s>₹{(item.price * 1.3).toFixed(2)}</s>
-                  </span>
-                  <div className="counter">
-                    {cart[item.id] ? (
-                      <>
-                        <button onClick={() => removeFromCart(item.id)}>
-                          -
-                        </button>
-                        <span>{cart[item.id]}</span>
-                        <button onClick={() => addToCart(item)}>+</button>
-                      </>
-                    ) : (
-                      <button
-                        className="add-offer-btn"
-                        onClick={() => addToCart(item)}
-                      >
-                        Add
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="cart-summary">
-            <p>Item Total: ₹{totalAmount}</p>
-            {appliedCoupon && <p>Coupon Discount: -₹{discount}</p>}
-            <p>Total Discount: ₹{totalDiscount.toFixed(2)}</p>
-            <h3>Total: ₹{finalAmount.toFixed(2)}</h3>
-          </div>
-
-          <button
-            className="checkout-button"
-            onClick={() =>
-              navigate("/payment", { state: { amount: finalAmount } })
-            }
-          >
-            Pay ₹{finalAmount.toFixed(2)}
-          </button>
-        </>
-      )}
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                onClick={() => handleRemoveFromCart(cartItem.productId)}
+              >
+                Remove from Cart
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <h2 className="text-2xl font-bold mt-4">Total Price: ${totalPrice}</h2>
     </div>
   );
 };
