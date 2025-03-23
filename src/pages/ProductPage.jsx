@@ -7,6 +7,7 @@ import {
   getDoc,
   updateDoc,
 } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebaseConfig";
 
 const ProductPage = () => {
@@ -19,14 +20,19 @@ const ProductPage = () => {
   const [cartItems, setCartItems] = useState({});
 
   useEffect(() => {
-    const fetchUserId = async () => {
-      const querySnapshot = await getDocs(collection(db, "users"));
-      const user = querySnapshot.docs[0]; // Replace with logic to get the correct user
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUserId(user.id);
+        setUserId(user.uid);
+      } else {
+        setUserId("");
       }
-    };
+    });
 
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const fetchProducts = async () => {
       const querySnapshot = await getDocs(collection(db, "products"));
       const productsList = querySnapshot.docs.map((doc) => ({
@@ -47,6 +53,11 @@ const ProductPage = () => {
       setCategories(categoriesList);
     };
 
+    fetchProducts();
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
     const fetchCartItems = async () => {
       if (!userId) return;
       const cartRef = doc(db, "carts", userId);
@@ -67,10 +78,9 @@ const ProductPage = () => {
       }
     };
 
-    fetchUserId();
-    fetchProducts();
-    fetchCategories();
-    fetchCartItems();
+    if (userId) {
+      fetchCartItems();
+    }
   }, [userId]);
 
   useEffect(() => {
@@ -84,15 +94,15 @@ const ProductPage = () => {
   }, [selectedCategory, products]);
 
   const handleQuantityChange = async (productId, quantity) => {
-    setQuantities((prevQuantities) => ({
-      ...prevQuantities,
-      [productId]: quantity,
-    }));
-
     if (!userId) {
       console.error("User ID not found");
       return;
     }
+
+    setQuantities((prevQuantities) => ({
+      ...prevQuantities,
+      [productId]: quantity,
+    }));
 
     const cartRef = doc(db, "carts", userId);
     const cartSnap = await getDoc(cartRef);
@@ -145,6 +155,7 @@ const ProductPage = () => {
           (total, item) => total + item.price * item.quantity,
           0
         ),
+        userId: userId,
       });
     } else {
       // Create new cart
@@ -157,6 +168,7 @@ const ProductPage = () => {
           },
         ],
         totalPrice: product.price * quantity,
+        userId: userId,
       });
     }
 
@@ -166,6 +178,44 @@ const ProductPage = () => {
     }));
 
     console.log("Added to cart:", product);
+  };
+
+  const removeFromCart = async (productId) => {
+    if (!userId) {
+      console.error("User ID not found");
+      return;
+    }
+
+    const cartRef = doc(db, "carts", userId);
+    const cartSnap = await getDoc(cartRef);
+
+    if (cartSnap.exists()) {
+      const existingItems = cartSnap.data().items || [];
+      const updatedItems = existingItems.filter(
+        (item) => item.productId !== productId
+      );
+      await updateDoc(cartRef, {
+        items: updatedItems,
+        totalPrice: updatedItems.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0
+        ),
+      });
+
+      setCartItems((prevCartItems) => {
+        const newCartItems = { ...prevCartItems };
+        delete newCartItems[productId];
+        return newCartItems;
+      });
+
+      setQuantities((prevQuantities) => {
+        const newQuantities = { ...prevQuantities };
+        delete newQuantities[productId];
+        return newQuantities;
+      });
+
+      console.log("Removed from cart:", productId);
+    }
   };
 
   return (
@@ -253,6 +303,12 @@ const ProductPage = () => {
                     }
                   >
                     +
+                  </button>
+                  <button
+                    className="bg-red-500 text-white px-4 py-2 rounded ml-2 hover:bg-red-600 transition-colors duration-300"
+                    onClick={() => removeFromCart(product.id)}
+                  >
+                    Remove
                   </button>
                 </div>
               ) : (
