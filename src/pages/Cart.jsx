@@ -122,68 +122,71 @@ const Cart = () => {
       ) : cartItems.length === 0 ? (
         <p className="text-gray-500">Your cart is empty.</p>
       ) : (
-        <div className="p-4 rounded-lg">
+        <div className="border p-4 rounded-lg">
           {cartItems.map((product) => (
-            <div
-              key={product.productId}
-              className=" border flex items-center py-4 gap-4"
-            >
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="w-24 h-24 rounded"
-              />
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold">{product.name}</h2>
-                <p className="text-gray-600">Price: ₹{product.price}</p>
-                <p className="text-green-600">In stock</p>
-                <div className="flex items-center mt-2">
-                  <button
-                    className="bg-gray-300 text-gray-700 px-2 py-1 rounded-l"
-                    onClick={() =>
-                      handleQuantityChange(
-                        product.productId,
-                        Math.max(product.quantity - 1, 1)
-                      )
-                    }
-                    disabled={product.quantity <= 1}
-                  >
-                    -
-                  </button>
-                  <input
-                    type="text"
-                    className="w-12 text-center border-t border-b border-gray-300"
-                    value={product.quantity}
-                    onChange={(e) =>
-                      handleQuantityChange(
-                        product.productId,
-                        parseInt(e.target.value) || 1
-                      )
-                    }
-                  />
-                  <button
-                    className="bg-gray-300 text-gray-700 px-2 py-1 rounded-r"
-                    onClick={() =>
-                      handleQuantityChange(
-                        product.productId,
-                        product.quantity + 1
-                      )
-                    }
-                  >
-                    +
-                  </button>
-                  <button
-                    className="bg-red-500 text-white px-4 py-2 rounded ml-4 hover:bg-red-600 transition"
-                    onClick={() => removeFromCart(product.productId)}
-                  >
-                    Delete
-                  </button>
+            <>
+              <div
+                key={product.productId}
+                className="flex items-center py-4 gap-4"
+              >
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-24 h-24 rounded"
+                />
+                <div className="flex-1">
+                  <h2 className="text-lg font-semibold">{product.name}</h2>
+                  <p className="text-gray-600">Price: ₹{product.price}</p>
+                  <p className="text-green-600">In stock</p>
+                  <div className="flex items-center mt-2">
+                    <button
+                      className="bg-gray-300 text-gray-700 px-2 py-1 rounded-l"
+                      onClick={() =>
+                        handleQuantityChange(
+                          product.productId,
+                          Math.max(product.quantity - 1, 1)
+                        )
+                      }
+                      disabled={product.quantity <= 1}
+                    >
+                      -
+                    </button>
+                    <input
+                      type="text"
+                      className="w-12 text-center border-t border-b border-gray-300"
+                      value={product.quantity}
+                      onChange={(e) =>
+                        handleQuantityChange(
+                          product.productId,
+                          parseInt(e.target.value) || 1
+                        )
+                      }
+                    />
+                    <button
+                      className="bg-gray-300 text-gray-700 px-2 py-1 rounded-r"
+                      onClick={() =>
+                        handleQuantityChange(
+                          product.productId,
+                          product.quantity + 1
+                        )
+                      }
+                    >
+                      +
+                    </button>
+                    <button
+                      className="bg-red-500 text-white px-4 py-2 rounded ml-4 hover:bg-red-600 transition"
+                      onClick={() => removeFromCart(product.productId)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
+                <p className="text-lg font-semibold">
+                  ₹{product.price * product.quantity}
+                </p>
               </div>
-              <p className="text-lg font-semibold">
-                ₹{product.price * product.quantity}
-              </p>
-            </div>
+              <hr />
+            </>
           ))}
           <div className="mt-4">
             <select
