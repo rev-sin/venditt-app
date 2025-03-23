@@ -9,6 +9,8 @@ import {
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebaseConfig";
+import Card from "../components/Card";
+import SkeletonCard from "../components/SkeletonCard"; // Import your SkeletonCard component
 
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
@@ -18,6 +20,7 @@ const ProductPage = () => {
   const [userId, setUserId] = useState("");
   const [quantities, setQuantities] = useState({});
   const [cartItems, setCartItems] = useState({});
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const auth = getAuth();
@@ -34,6 +37,7 @@ const ProductPage = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      setLoading(true); // Set loading to true before fetching data
       const querySnapshot = await getDocs(collection(db, "products"));
       const productsList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -42,6 +46,7 @@ const ProductPage = () => {
       console.log(productsList);
       setProducts(productsList);
       setFilteredProducts(productsList);
+      setLoading(false); // Set loading to false after data is fetched
     };
 
     const fetchCategories = async () => {
@@ -247,81 +252,21 @@ const ProductPage = () => {
       <div className="w-full md:w-3/4 p-4">
         <h1 className="text-3xl font-bold mb-4">Products</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="border rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300"
-            >
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="w-full h-48 object-cover mb-4 rounded"
-              />
-              <h2 className="text-xl font-semibold mb-2">{product.name}</h2>
-              <p className="text-gray-700 mb-1">
-                Price: &#8377;{product.price}
-              </p>
-              <p
-                className={`text-gray-700 mb-1 ${
-                  product.stock > 0 ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                {product.stock > 0 ? "In Stock" : "Out of Stock"}
-              </p>
-              {cartItems[product.id] ? (
-                <div className="flex items-center mb-2">
-                  <button
-                    className="bg-gray-300 text-gray-700 px-2 py-1 rounded-l"
-                    onClick={() =>
-                      handleQuantityChange(
-                        product.id,
-                        Math.max((quantities[product.id] || 1) - 1, 1)
-                      )
-                    }
-                    disabled={quantities[product.id] <= 1}
-                  >
-                    -
-                  </button>
-                  <input
-                    type="text"
-                    className="w-12 text-center border-t border-b border-gray-300"
-                    value={quantities[product.id] || 1}
-                    onChange={(e) =>
-                      handleQuantityChange(
-                        product.id,
-                        parseInt(e.target.value) || 1
-                      )
-                    }
-                  />
-                  <button
-                    className="bg-gray-300 text-gray-700 px-2 py-1 rounded-r"
-                    onClick={() =>
-                      handleQuantityChange(
-                        product.id,
-                        (quantities[product.id] || 1) + 1
-                      )
-                    }
-                  >
-                    +
-                  </button>
-                  <button
-                    className="bg-red-500 text-white px-4 py-2 rounded ml-2 hover:bg-red-600 transition-colors duration-300"
-                    onClick={() => removeFromCart(product.id)}
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded mt-2 hover:bg-blue-600 transition-colors duration-300"
-                  onClick={() => addToCart(product)}
-                  disabled={product.stock === 0}
-                >
-                  Add to Cart
-                </button>
-              )}
-            </div>
-          ))}
+          {loading
+            ? Array.from({ length: 8 }).map((_, index) => (
+                <SkeletonCard key={index} />
+              ))
+            : filteredProducts.map((product) => (
+                <Card
+                  key={product.id}
+                  product={product}
+                  quantities={quantities}
+                  cartItems={cartItems}
+                  handleQuantityChange={handleQuantityChange}
+                  addToCart={addToCart}
+                  removeFromCart={removeFromCart}
+                />
+              ))}
         </div>
       </div>
     </div>

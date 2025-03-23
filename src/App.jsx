@@ -14,6 +14,7 @@ import Cart from "./pages/Cart";
 import Payment from "./pages/Payment";
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminProducts from "./pages/AdminProducts";
+import AdminCategory from "./pages/AdminCategory";
 import "./App.css";
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/adminProducts" element={<AdminProducts />} />
+        <Route path="/adminCategory" element={<AdminCategory />} />
       </Routes>
       <BottomNav />
     </CartProvider>

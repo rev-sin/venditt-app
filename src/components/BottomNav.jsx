@@ -7,10 +7,7 @@ function BottomNav() {
         Home
       </Link>
       <Link to="/products" className="nav-item text-center">
-        Categories
-      </Link>
-      <Link to="/offers" className="nav-item text-center">
-        Wishlist
+        Products
       </Link>
       <Link to="/cart" className="nav-item text-center">
         Cart
