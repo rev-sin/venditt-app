@@ -1,27 +1,23 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  getDocs,
+} from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebaseConfig";
-
-const Skeleton = () => (
-  <div className="animate-pulse flex space-x-4">
-    <div className="rounded bg-gray-300 h-24 w-24"></div>
-    <div className="flex-1 space-y-4 py-1">
-      <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-      <div className="space-y-2">
-        <div className="h-4 bg-gray-300 rounded"></div>
-        <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-      </div>
-    </div>
-  </div>
-);
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
+  const [suggestedItems, setSuggestedItems] = useState([]);
   const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(true);
   const [coupon, setCoupon] = useState("");
   const [discount, setDiscount] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const auth = getAuth();
@@ -41,40 +37,42 @@ const Cart = () => {
       const cartRef = doc(db, "carts", userId);
       const cartSnap = await getDoc(cartRef);
       if (cartSnap.exists()) {
-        const cartData = cartSnap.data().items;
-        const updatedCartItems = await Promise.all(
-          cartData.map(async (item) => {
-            const productRef = doc(db, "products", item.productId);
-            const productSnap = await getDoc(productRef);
-            if (productSnap.exists()) {
-              return { ...item, ...productSnap.data() };
-            }
-            return item;
-          })
-        );
-        setCartItems(updatedCartItems);
+        setCartItems(cartSnap.data().items || []);
       }
       setLoading(false);
     };
+
+    const fetchSuggestedItems = async () => {
+      const productsRef = collection(db, "products");
+      const productsSnap = await getDocs(productsRef);
+      if (!productsSnap.empty) {
+        const productList = productsSnap.docs.map((doc) => ({
+          productId: doc.id,
+          ...doc.data(),
+        }));
+        setSuggestedItems(productList.slice(0, 5)); // Fetch only 5 items
+      }
+    };
+
     if (userId) {
       fetchCartItems();
+      fetchSuggestedItems();
     }
   }, [userId]);
 
   const handleQuantityChange = async (productId, quantity) => {
+    if (quantity < 1) {
+      removeFromCart(productId);
+      return;
+    }
+
     const updatedItems = cartItems.map((product) =>
       product.productId === productId ? { ...product, quantity } : product
     );
     setCartItems(updatedItems);
 
     const cartRef = doc(db, "carts", userId);
-    await updateDoc(cartRef, {
-      items: updatedItems,
-      totalPrice: updatedItems.reduce(
-        (total, product) => total + product.price * product.quantity,
-        0
-      ),
-    });
+    await updateDoc(cartRef, { items: updatedItems });
   };
 
   const removeFromCart = async (productId) => {
@@ -84,19 +82,34 @@ const Cart = () => {
     setCartItems(updatedItems);
 
     const cartRef = doc(db, "carts", userId);
-    await updateDoc(cartRef, {
-      items: updatedItems,
-      totalPrice: updatedItems.reduce(
-        (total, product) => total + product.price * product.quantity,
-        0
-      ),
-    });
+    await updateDoc(cartRef, { items: updatedItems });
+  };
+
+  const addToCart = async (product) => {
+    const existingItem = cartItems.find(
+      (item) => item.productId === product.productId
+    );
+    let updatedItems;
+
+    if (existingItem) {
+      updatedItems = cartItems.map((item) =>
+        item.productId === product.productId
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      );
+    } else {
+      updatedItems = [...cartItems, { ...product, quantity: 1 }];
+    }
+
+    setCartItems(updatedItems);
+
+    const cartRef = doc(db, "carts", userId);
+    await updateDoc(cartRef, { items: updatedItems });
   };
 
   const applyCoupon = () => {
-    // Example coupon logic
     if (coupon === "DISCOUNT10") {
-      setDiscount(0.1); // 10% discount
+      setDiscount(0.1);
     } else {
       setDiscount(0);
       alert("Invalid coupon code");
@@ -109,116 +122,152 @@ const Cart = () => {
   );
 
   const discountedPrice = totalPrice * (1 - discount);
+  const platformFee = 8;
+  const finalAmount = discountedPrice + platformFee;
 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
-      {loading ? (
-        <div className="space-y-4">
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
+      {/* Cart Items Section */}
+      <div className="border p-4 rounded-lg shadow-md mb-6">
+        {loading ? (
+          <p>Loading...</p>
+        ) : cartItems.length === 0 ? (
+          <p className="text-gray-500 text-center">Your cart is empty.</p>
+        ) : (
+          cartItems.map((product) => (
+            <div
+              key={product.productId}
+              className="flex items-center justify-between py-4 border-b"
+            >
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="w-24 h-24 rounded shadow object-cover"
+              />
+              <div className="flex-1 px-4">
+                <h2 className="text-lg font-semibold">{product.name}</h2>
+                <p className="text-gray-600">₹{product.price}</p>
+              </div>
+              <div className="flex items-center">
+                <button
+                  className="bg-gray-300 px-2 py-1 rounded-l text-lg"
+                  onClick={() =>
+                    handleQuantityChange(
+                      product.productId,
+                      product.quantity - 1
+                    )
+                  }
+                >
+                  -
+                </button>
+                <input
+                  type="text"
+                  className="w-12 text-center border-t border-b text-lg"
+                  value={product.quantity}
+                  readOnly
+                />
+                <button
+                  className="bg-gray-300 px-2 py-1 rounded-r text-lg"
+                  onClick={() =>
+                    handleQuantityChange(
+                      product.productId,
+                      product.quantity + 1
+                    )
+                  }
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+      {/* Coupon Section */}
+      <div className="border p-4 rounded-lg shadow-md mb-6">
+        <h2 className="text-lg font-bold">Apply Coupon</h2>
+        <div className="flex items-center mt-2">
+          <input
+            className="border p-2 rounded w-1/3"
+            placeholder="Enter coupon code"
+            value={coupon}
+            onChange={(e) => setCoupon(e.target.value)}
+          />
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded ml-2"
+            onClick={applyCoupon}
+          >
+            Apply
+          </button>
         </div>
-      ) : cartItems.length === 0 ? (
-        <p className="text-gray-500">Your cart is empty.</p>
-      ) : (
-        <div className="border p-4 rounded-lg">
-          {cartItems.map((product) => (
-            <>
+      </div>
+      {/* Suggested Items Section */}
+      <div className="border p-4 rounded-lg shadow-md mb-6">
+        <h2 className="text-lg font-bold mb-2">You Might Also Like</h2>
+        <div className="grid grid-cols-5 gap-4">
+          {suggestedItems.map((item) => {
+            const inCart = cartItems.find(
+              (cartItem) => cartItem.productId === item.productId
+            );
+            return (
               <div
-                key={product.productId}
-                className="flex items-center py-4 gap-4"
+                key={item.productId}
+                className="border p-3 rounded-lg shadow-md flex flex-col items-center"
               >
                 <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="w-24 h-24 rounded"
+                  src={item.imageUrl}
+                  alt={item.name}
+                  className="w-32 h-32 object-cover rounded"
                 />
-                <div className="flex-1">
-                  <h2 className="text-lg font-semibold">{product.name}</h2>
-                  <p className="text-gray-600">Price: ₹{product.price}</p>
-                  <p className="text-green-600">In stock</p>
-                  <div className="flex items-center mt-2">
+                <h3 className="text-sm font-semibold mt-2">{item.name}</h3>
+                <p className="text-gray-600">₹{item.price}</p>
+                {inCart ? (
+                  <div className="flex mt-2">
                     <button
-                      className="bg-gray-300 text-gray-700 px-2 py-1 rounded-l"
                       onClick={() =>
                         handleQuantityChange(
-                          product.productId,
-                          Math.max(product.quantity - 1, 1)
+                          item.productId,
+                          inCart.quantity - 1
                         )
                       }
-                      disabled={product.quantity <= 1}
                     >
                       -
                     </button>
-                    <input
-                      type="text"
-                      className="w-12 text-center border-t border-b border-gray-300"
-                      value={product.quantity}
-                      onChange={(e) =>
-                        handleQuantityChange(
-                          product.productId,
-                          parseInt(e.target.value) || 1
-                        )
-                      }
-                    />
+                    <span className="px-4">{inCart.quantity}</span>
                     <button
-                      className="bg-gray-300 text-gray-700 px-2 py-1 rounded-r"
                       onClick={() =>
                         handleQuantityChange(
-                          product.productId,
-                          product.quantity + 1
+                          item.productId,
+                          inCart.quantity + 1
                         )
                       }
                     >
                       +
                     </button>
-                    <button
-                      className="bg-red-500 text-white px-4 py-2 rounded ml-4 hover:bg-red-600 transition"
-                      onClick={() => removeFromCart(product.productId)}
-                    >
-                      Delete
-                    </button>
                   </div>
-                </div>
-                <p className="text-lg font-semibold">
-                  ₹{product.price * product.quantity}
-                </p>
+                ) : (
+                  <button onClick={() => addToCart(item)}>Add to Cart</button>
+                )}
               </div>
-              <hr />
-            </>
-          ))}
-          <div className="mt-4">
-            <select
-              className="border p-2 rounded"
-              value={coupon}
-              onChange={(e) => setCoupon(e.target.value)}
-            >
-              <option value="">Select a coupon</option>
-              <option value="DISCOUNT10">DISCOUNT10 - 10% off</option>
-              {/* Add more coupon options here */}
-            </select>
-            <button
-              className="bg-blue-500 text-white px-4 py-2 rounded ml-2 hover:bg-blue-600 transition"
-              onClick={applyCoupon}
-            >
-              Apply Coupon
-            </button>
-          </div>
-          <div className="text-right mt-4 text-lg font-bold">
-            Subtotal ({cartItems.length} product
-            {cartItems.length > 1 ? "s" : ""}): ₹{totalPrice}
-          </div>
-          {discount > 0 && (
-            <div className="text-right mt-2 text-lg font-bold text-green-600">
-              Discount: -₹{totalPrice * discount}
-            </div>
-          )}
-          <div className="text-right mt-2 text-lg font-bold">
-            Total: ₹{discountedPrice}
-          </div>
+            );
+          })}
         </div>
-      )}
+      </div>
+      {/* Order Summary (Again Before Payment) */}
+      <div className="border p-4 rounded-lg shadow-md mb-6">
+        <h2 className="text-lg font-bold mb-2">Final Order Summary</h2>
+        <p>Subtotal: ₹{totalPrice.toFixed(2)}</p>
+        <p>Discount: ₹{(totalPrice * discount).toFixed(2)}</p>
+        <p>Platform Fee: ₹{platformFee.toFixed(2)}</p>
+        <p className="font-bold">Total Payable: ₹{finalAmount.toFixed(2)}</p>
+      </div>
+      {/* Proceed to Payment Button */}
+      <button
+        onClick={() => navigate("/payment")}
+        className="bg-green-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-green-600 transition-all mb-12"
+      >
+        Proceed to Payment
+      </button>
     </div>
   );
 };
