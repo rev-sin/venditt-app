@@ -205,7 +205,67 @@ const Cart = () => {
       </h1>
 
       {loading ? (
-        <p className="text-center text-gray-600">Loading...</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            {/* Skeleton for cart items */}
+            <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+              <div className="skeleton h-8 w-48 mb-6"></div>
+              {[...Array(3)].map((_, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between py-4 border-b"
+                >
+                  <div className="skeleton w-20 h-20 rounded"></div>
+                  <div className="flex-1 px-4">
+                    <div className="skeleton h-6 w-3/4 mb-2"></div>
+                    <div className="skeleton h-4 w-1/2 mb-4"></div>
+                    <div className="flex items-center">
+                      <div className="skeleton h-8 w-8 rounded-l"></div>
+                      <div className="skeleton h-8 w-8 mx-2"></div>
+                      <div className="skeleton h-8 w-8 rounded-r"></div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <div className="skeleton h-6 w-16 mb-2"></div>
+                    <div className="skeleton h-4 w-12"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Skeleton for coupon section */}
+            <div className="bg-white p-6 rounded-lg shadow-md mb-20">
+              <div className="skeleton h-8 w-48 mb-6"></div>
+              <div className="flex items-center">
+                <div className="skeleton h-12 flex-grow rounded-lg"></div>
+                <div className="skeleton h-12 w-24 ml-4 rounded-lg"></div>
+              </div>
+              <div className="skeleton h-6 w-full mt-4 rounded-lg"></div>
+            </div>
+          </div>
+
+          <div>
+            {/* Skeleton for bill summary */}
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="skeleton h-8 w-48 mb-6"></div>
+              <div className="flex justify-between py-2">
+                <div className="skeleton h-4 w-24"></div>
+                <div className="skeleton h-4 w-16"></div>
+              </div>
+              <div className="flex justify-between py-2">
+                <div className="skeleton h-4 w-24"></div>
+                <div className="skeleton h-4 w-16"></div>
+              </div>
+              <div className="skeleton h-px w-full my-4"></div>
+              <div className="flex justify-between">
+                <div className="skeleton h-6 w-24"></div>
+                <div className="skeleton h-6 w-24"></div>
+              </div>
+            </div>
+
+            <div className="skeleton h-14 w-full mt-6 rounded-lg"></div>
+          </div>
+        </div>
       ) : cartItems.length === 0 ? (
         <div className="flex flex-col items-center">
           <img

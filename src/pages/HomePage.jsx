@@ -25,26 +25,26 @@ function HomePage() {
   const [cartItemCount, setCartItemCount] = useState(0);
   const navigate = useNavigate();
 
-  // Categories data
+  // Categories data with web images
   const categories = [
     {
       name: "Snacks",
-      image: "/assets/snacks.jpg",
+      image: "https://images.unsplash.com/photo-1550583724-b2692b85b150",
       path: "/products?category=snacks",
     },
     {
       name: "Drinks",
-      image: "/assets/drinks.jpg",
+      image: "https://images.unsplash.com/photo-1551029506-0807df4e2031",
       path: "/products?category=drinks",
     },
     {
       name: "Ice Cream",
-      image: "/assets/icecream.jpg",
+      image: "https://images.unsplash.com/photo-1566566220367-af8d77209124",
       path: "/products?category=icecream",
     },
     {
       name: "Healthy Options",
-      image: "/assets/healthy.jpg",
+      image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
       path: "/products?category=healthy",
     },
   ];
@@ -102,7 +102,7 @@ function HomePage() {
     return () => unsubscribeAuth();
   }, []);
 
-  // Fetch user location
+  // Fetch user location with better place name resolution
   useEffect(() => {
     const fetchLocation = async () => {
       setLoadingLocation(true);
@@ -120,33 +120,44 @@ function HomePage() {
             try {
               const { latitude: lat, longitude: lng } = position.coords;
               const response = await fetch(
-                `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyD6oR6e-7GCylEFsGhv5LZqQMB27N28j38`
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
               );
               const data = await response.json();
 
-              if (data.status === "OK" && data.results.length > 0) {
-                const address = data.results[0].formatted_address;
-                setCurrentLocation(address);
-                localStorage.setItem("selectedLocation", address);
+              if (data.address) {
+                // Construct a readable address
+                let addressParts = [];
+                if (data.address.road) addressParts.push(data.address.road);
+                if (data.address.suburb) addressParts.push(data.address.suburb);
+                if (data.address.city) addressParts.push(data.address.city);
+                if (data.address.state) addressParts.push(data.address.state);
+
+                const readableAddress =
+                  addressParts.join(", ") ||
+                  data.display_name ||
+                  "Your current location";
+
+                setCurrentLocation(readableAddress);
+                localStorage.setItem("selectedLocation", readableAddress);
               } else {
-                setCurrentLocation("Location not found");
+                setCurrentLocation("Your current location");
               }
             } catch (error) {
               console.error("Geocoding error:", error);
-              setCurrentLocation("Error fetching location");
+              setCurrentLocation("Your current location");
             } finally {
               setLoadingLocation(false);
             }
           },
           (error) => {
             console.error("Geolocation error:", error);
-            setCurrentLocation("Location access denied");
+            setCurrentLocation("Enable location for better experience");
             setLoadingLocation(false);
           },
           { timeout: 10000 }
         );
       } else {
-        setCurrentLocation("Geolocation not supported");
+        setCurrentLocation("Location not available");
         setLoadingLocation(false);
       }
     };
@@ -170,7 +181,12 @@ function HomePage() {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery(""); // Clear search after submission
     }
+  };
+
+  const handleViewOffers = () => {
+    navigate("/offers-rewards");
   };
 
   if (showSplash) {
@@ -204,8 +220,18 @@ function HomePage() {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search products"
               />
               <button type="submit" className="search-button">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                </svg>
                 Search
               </button>
             </div>
@@ -272,15 +298,22 @@ function HomePage() {
               key={index}
               className="category-item hover-effect"
             >
-              <img src={category.image} alt={category.name} />
-              {category.name}
+              <div
+                className="category-image"
+                style={{
+                  backgroundImage: `url(${category.image})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              />
+              <span>{category.name}</span>
             </Link>
           ))}
         </div>
       </section>
 
       <section className="offers">
-        <div className="offers-content" onClick={() => navigate("/offers")}>
+        <div className="offers-content" onClick={handleViewOffers}>
           <h2>Top Deals for You</h2>
           <p>Save more on your favorite vending options.</p>
           <button className="view-offers-btn">View All Offers</button>

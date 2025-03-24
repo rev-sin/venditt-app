@@ -375,9 +375,9 @@
     min-width: 220px;
     max-width: 280px;
     padding: 25px;
-    background: white;
+    background: rgb(182, 181, 181);
     border-radius: 16px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 5px 15px rgba(154, 148, 148, 0.05);
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 1px solid #e9ecef;

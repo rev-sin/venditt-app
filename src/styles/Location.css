@@ -1,81 +1,356 @@
-/* Location Page Styling */
+/* Location.css */
+
+/* Base Styles */
 .location-page {
-    display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  color: #2d3748;
+  min-height: 100vh;
+}
+
+/* Header Section */
+.location-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.location-header h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.location-header p {
+  font-size: 1.1rem;
+  color: #4a5568;
+  font-weight: 400;
+}
+
+/* Main Content Layout */
+.location-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+/* Map Container */
+.map-container {
+  height: 500px;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.map-error, .map-loading {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  color: #4a5568;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Address Management Section */
+.address-management {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Form Container */
+.address-form-container {
+  background: white;
+  padding: 1.75rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.address-form-container h2, .saved-addresses-container h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #1a202c;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.address-form-container h2::before, .saved-addresses-container h2::before {
+  content: "";
+  display: block;
+  width: 24px;
+  height: 24px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.address-form-container h2::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234a5568'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' /%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' /%3E%3C/svg%3E");
+}
+
+/* Form Styles */
+.address-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.form-group input, .form-group select {
+  padding: 0.85rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background-color: #f8fafc;
+}
+
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+  background-color: white;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Save Button */
+.save-btn {
+  margin-top: 0.5rem;
+  padding: 0.9rem;
+  background: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.save-btn:hover {
+  background: #3182ce;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Saved Addresses Container */
+.saved-addresses-container {
+  background: white;
+  padding: 1.75rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.saved-addresses-container h2::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234a5568'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z' /%3E%3C/svg%3E");
+}
+
+.loading-message, .empty-message {
+  text-align: center;
+  padding: 2.5rem;
+  color: #718096;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e0;
+}
+
+.empty-message p:first-child {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #4a5568;
+}
+
+/* Address List */
+.address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.address-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.address-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border-color: #bee3f8;
+}
+
+.address-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.address-type {
+  background: #ebf8ff;
+  color: #3182ce;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.address-card h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0;
+}
+
+.address-details {
+  color: #4a5568;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.address-details p {
+  margin: 0.25rem 0;
+}
+
+/* Action Buttons */
+.address-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.use-btn, .delete-btn {
+  padding: 0.65rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.use-btn {
+  background: #48bb78;
+  color: white;
+}
+
+.use-btn:hover {
+  background: #38a169;
+  transform: translateY(-1px);
+}
+
+.delete-btn {
+  background: white;
+  color: #e53e3e;
+  border: 1px solid #e53e3e;
+}
+
+.delete-btn:hover {
+  background: #e53e3e;
+  color: white;
+}
+
+/* Back Button */
+.back-btn {
+  display: block;
+  margin: 2rem auto 0;
+  padding: 0.85rem 2rem;
+  background: white;
+  color: #4299e1;
+  border: 1px solid #4299e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #ebf8ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .location-content {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .location-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .map-container {
+    height: 350px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .address-actions {
     flex-direction: column;
-    height: 100vh;
-    font-family: Arial, sans-serif;
   }
   
-  /* Top Bar with Search and Saved Addresses */
-  .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .search-bar {
-    width: 40%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  .saved-addresses {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .saved-address {
-    background-color: #007bff;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  /* Main Container */
-  .location-container {
-    display: flex;
-    flex: 1;
-  }
-  
-  /* Google Map Section */
-  .map-section {
-    flex: 1.5;
-    height: 100%;
-  }
-  
-  /* Address Form Section */
-  .address-form {
-    flex: 1;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: -2px 0px 10px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .address-form input, .address-form select {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+  .use-btn, .delete-btn {
     width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .location-page {
+    padding: 1.5rem 1rem;
   }
   
-  .address-form button {
-    padding: 10px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  .location-header h1 {
+    font-size: 1.8rem;
   }
   
-  .address-form button:hover {
-    background-color: #218838;
+  .address-form-container, .saved-addresses-container {
+    padding: 1.25rem;
   }
-  
+}

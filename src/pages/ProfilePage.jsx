@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { auth, db } from "../firebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
@@ -10,7 +10,8 @@ const ProfilePage = () => {
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [newName, setNewName] = useState("");
-  const [activeTab, setActiveTab] = useState("Reviews");
+  const [activeTab, setActiveTab] = useState("Settings");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,10 +19,16 @@ const ProfilePage = () => {
       if (!user) {
         navigate("/login");
       } else {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          setUser({ uid: user.uid, ...userDoc.data() });
-          setNewName(userDoc.data().name);
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setUser({ uid: user.uid, ...userDoc.data() });
+            setNewName(userDoc.data().name);
+          }
+        } catch (error) {
+          console.error("Error loading profile:", error);
+        } finally {
+          setLoading(false);
         }
       }
     });
@@ -32,141 +39,216 @@ const ProfilePage = () => {
   const handleProfileUpdate = async () => {
     if (!user) return;
 
-    const userRef = doc(db, "users", user.uid);
-    await updateDoc(userRef, { name: newName });
-
-    setEditMode(false);
+    try {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, { name: newName });
+      setEditMode(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   };
 
-  return (
-    <div className="container mx-auto p-6">
-      {/* Profile Header */}
-      <div className="bg-white shadow-lg rounded-lg p-8 mb-8">
-        <img
-          src={vendittLogo}
-          alt="Venditt Logo"
-          className="w-24 mx-auto mb-6"
-        />
-        <div className="flex items-center justify-between mb-6">
-          <img
-            src="/default-avatar.png"
-            alt="Profile"
-            className="w-20 h-20 rounded-full"
-          />
-          {editMode ? (
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              className="border p-2 rounded w-full ml-4"
-            />
-          ) : (
-            <h2 className="text-2xl font-semibold ml-4">
-              {user?.name || "User"}
-            </h2>
-          )}
-          {editMode ? (
-            <button
-              className="bg-blue-600 text-white px-4 py-2 rounded ml-4"
-              onClick={handleProfileUpdate}
-            >
-              Save
-            </button>
-          ) : (
-            <button
-              className="bg-gray-600 text-white px-4 py-2 rounded ml-4"
-              onClick={() => setEditMode(true)}
-            >
-              Edit profile
-            </button>
-          )}
+  if (loading) {
+    return (
+      <div className="profile-container">
+        {/* Skeleton Loading */}
+        <div className="skeleton-header"></div>
+
+        <div className="profile-content">
+          <div className="skeleton-sidebar"></div>
+          <div className="skeleton-main"></div>
         </div>
-        <div className="flex justify-around">
-          <div className="text-center">
-            <p className="text-xl font-semibold">0</p>
-            <span>Reviews</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="profile-container">
+      {/* Profile Header */}
+      <div className="profile-header">
+        <div className="profile-logo-container">
+          <img src={vendittLogo} alt="Venditt Logo" className="profile-logo" />
+        </div>
+
+        <div className="profile-info">
+          <div className="profile-avatar-container">
+            <div className="profile-avatar">
+              <span className="avatar-icon">👤</span>
+            </div>
+
+            <div className="profile-name-container">
+              {editMode ? (
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="profile-name-input"
+                  placeholder="Enter your name"
+                />
+              ) : (
+                <h2 className="profile-name">{user?.name || "User"}</h2>
+              )}
+
+              {editMode ? (
+                <div className="profile-actions">
+                  <button
+                    className="profile-save-btn"
+                    onClick={handleProfileUpdate}
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="profile-cancel-btn"
+                    onClick={() => setEditMode(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="profile-edit-btn"
+                  onClick={() => setEditMode(true)}
+                >
+                  Edit Profile
+                </button>
+              )}
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-xl font-semibold">0</p>
-            <span>Photos</span>
-          </div>
-          <div className="text-center">
-            <p className="text-xl font-semibold">0</p>
-            <span>Followers</span>
+
+          <div className="profile-stats">
+            <div className="stat-item">
+              <p className="stat-number">0</p>
+              <span className="stat-label">Reviews</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Profile Content */}
-      <div className="flex">
+      <div className="profile-content">
         {/* Sidebar */}
-        <div className="w-1/4 bg-white shadow-lg rounded-lg p-6">
-          <h4 className="font-semibold mb-4">Activity</h4>
-          <ul>
-            <li
-              className={`cursor-pointer p-2 rounded ${
-                activeTab === "Reviews" ? "bg-blue-600 text-white" : ""
-              }`}
-              onClick={() => setActiveTab("Reviews")}
-            >
-              Reviews
-            </li>
-            <li
-              className={`cursor-pointer p-2 rounded ${
-                activeTab === "Photos" ? "bg-blue-600 text-white" : ""
-              }`}
-              onClick={() => setActiveTab("Photos")}
-            >
-              Photos
-            </li>
-            <li
-              className={`cursor-pointer p-2 rounded ${
-                activeTab === "Followers" ? "bg-blue-600 text-white" : ""
-              }`}
-              onClick={() => setActiveTab("Followers")}
-            >
-              Followers
-            </li>
-            <li
-              className={`cursor-pointer p-2 rounded ${
-                activeTab === "Recently Viewed" ? "bg-blue-600 text-white" : ""
-              }`}
-              onClick={() => setActiveTab("Recently Viewed")}
-            >
-              Recently Viewed
-            </li>
-          </ul>
+        <div className="profile-sidebar">
+          <div className="sidebar-section">
+            <h4 className="sidebar-title">
+              <span className="sidebar-icon">⚙️</span>
+              Settings
+            </h4>
+            <ul className="sidebar-menu">
+              <li
+                className={`sidebar-item ${
+                  activeTab === "Settings" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("Settings")}
+              >
+                Account Settings
+              </li>
+            </ul>
+          </div>
 
-          <h4 className="font-semibold mt-6 mb-4">Online Ordering</h4>
-          <ul>
-            <li className="cursor-pointer p-2 rounded">My addresses</li>
-          </ul>
+          <div className="sidebar-section">
+            <h4 className="sidebar-title">
+              <span className="sidebar-icon">📍</span>
+              Locations
+            </h4>
+            <ul className="sidebar-menu">
+              <Link to="/location" className="sidebar-link">
+                <li className="sidebar-item">My Addresses</li>
+              </Link>
+            </ul>
+          </div>
 
-          <h4 className="font-semibold mt-6 mb-4">Payments</h4>
-          <ul>
-            <li className="cursor-pointer p-2 rounded">Manage Cards</li>
-          </ul>
+          <div className="sidebar-section">
+            <h4 className="sidebar-title">
+              <span className="sidebar-icon">💳</span>
+              Payments
+            </h4>
+            <ul className="sidebar-menu">
+              <li className="sidebar-item">Manage Cards</li>
+            </ul>
+          </div>
 
-          <h4 className="font-semibold mt-6 mb-4">Table Booking</h4>
-          <ul>
-            <li className="cursor-pointer p-2 rounded">Your Bookings</li>
-          </ul>
+          <div className="sidebar-section">
+            <h4 className="sidebar-title">
+              <span className="sidebar-icon">📦</span>
+              Orders
+            </h4>
+            <ul className="sidebar-menu">
+              <Link to="/orders" className="sidebar-link">
+                <li className="sidebar-item">Your Bookings</li>
+              </Link>
+            </ul>
+          </div>
 
-          <h4 className="font-semibold mt-6 mb-4">Account Settings</h4>
-          <ul>
-            <li className="cursor-pointer p-2 rounded">Delete Account</li>
-          </ul>
+          <div className="sidebar-section">
+            <h4 className="sidebar-title">
+              <span className="sidebar-icon">❌</span>
+              Account
+            </h4>
+            <ul className="sidebar-menu">
+              <li className="sidebar-item danger">Delete Account</li>
+            </ul>
+          </div>
+
+          {/* New Customer Support Section */}
+          <div className="sidebar-section">
+            <h4 className="sidebar-title">
+              <span className="sidebar-icon">🛟</span>
+              Support
+            </h4>
+            <ul className="sidebar-menu">
+              <li
+                className={`sidebar-item ${
+                  activeTab === "Support" ? "active" : ""
+                }`}
+                onClick={() => setActiveTab("Support")}
+              >
+                Contact Support
+              </li>
+              <li className="sidebar-item">FAQs</li>
+            </ul>
+          </div>
         </div>
 
         {/* Main Section */}
-        <div className="w-3/4 bg-white shadow-lg rounded-lg p-8 ml-6">
-          <h2 className="text-2xl font-semibold mb-6">{activeTab}</h2>
-          <div className="flex flex-col items-center justify-center h-full">
-            <img src="/empty-state.png" alt="Empty" className="w-32 mb-6" />
-            <p className="text-gray-500">Nothing here yet</p>
-          </div>
+        <div className="profile-main">
+          <h2 className="main-title">{activeTab}</h2>
+
+          {activeTab === "Settings" && (
+            <div className="settings-content">
+              <div className="empty-state">
+                <span className="empty-icon">⚙️</span>
+                <p className="empty-text">Account settings will appear here</p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "Support" && (
+            <div className="support-content">
+              <div className="support-card">
+                <h3>Contact Our Support Team</h3>
+                <p>Email us at: support@venditt.com</p>
+                <p>Call us: +1 (800) 123-4567</p>
+                <button className="support-button">Live Chat</button>
+              </div>
+
+              <div className="faq-section">
+                <h3>Frequently Asked Questions</h3>
+                <div className="faq-item">
+                  <h4>How do I change my password?</h4>
+                  <p>Go to Account Settings and select 'Change Password'.</p>
+                </div>
+                <div className="faq-item">
+                  <h4>What's your return policy?</h4>
+                  <p>We accept returns within 30 days of purchase.</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Bottom Gap */}
+      <div className="bottom-gap"></div>
     </div>
   );
 };
