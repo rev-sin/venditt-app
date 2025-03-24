@@ -1,8 +1,14 @@
 /* General Styling */
 .home-container {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     background-color: #f8f9fa;
-    color: #333;
+    color: #212529;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Navbar */
@@ -10,249 +16,550 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 15px 30px;
-    background-color: #222;
-    color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 8px 3%;
+    background-color: #454545;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 /* Left Navbar (Logo & Location) */
 .nav-left {
     display: flex;
     align-items: center;
+    gap: 30px;
 }
 
 .logo {
-    width: 120px;
+    width: 110px;
     height: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.03);
 }
 
 /* Location */
 .location {
-    margin-left: 15px;
-    font-size: 14px;
     display: flex;
     align-items: center;
     cursor: pointer;
-    color: #ddd;
-    transition: color 0.3s ease;
+    color: white;
+    transition: all 0.3s ease;
+    padding: 6px 12px;
+    border-radius: 12px;
+    background-color: transparent;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
 }
 
 .location:hover {
-    color: white;
+    background-color: #f8f9fa;
+    color: #343a40;
+}
+
+.location.loading {
+    color: #adb5bd;
 }
 
 .location-icon {
-    margin-right: 5px;
+    margin-right: 8px;
+    font-size: 16px;
 }
 
 /* Right Navbar (Search, Cart, Login) */
 .nav-right {
     display: flex;
-    align-items: center;
+    gap: 25px;
+}
+
+/* Search Form Styles */
+.search-form {
+    margin: 0;
+    max-width: 350px;
+}
+
+.search-container {
+    display: flex;
+    align-items: center; /* Ensure proper vertical alignment */
+    justify-content: space-between;
+    border: 1px solid #ced4da;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    transition: box-shadow 0.3s ease;
+    height: 40px;
+    width: 100%;
 }
 
 .search-bar {
-    padding: 8px;
-    border-radius: 20px;
-    border: 1px solid #ddd;
-    margin-right: 15px;
-    width: 200px;
+    flex: 9; /* 90% width */
+    padding: 10px 15px;
+    border: none;
+    font-size: 14px;
+    outline: none;
+    color: #495057;
+    background-color: transparent;
+    text-align: left;
+}
+
+.search-button {
+    flex: 1; /* 10% width */
+    background-color: transparent;
+    color: black;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-radius: 0 20px 20px 0;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+
+.search-container:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+
+.search-bar::placeholder {
+    color: #adb5bd;
+    font-style: italic;
+}
+
+
+.search-button:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+  /* Spacing after offers section */
+  .after-offers-spacing {
+    height: 60px;
+    background-color: #f8f9fa;
+  }
+  
+
+/* Cart Button */
+.cart-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f1f3f5;
+    transition: all 0.3s ease;
+}
+
+.cart-button:hover {
+    background-color: #e9ecef;
+}
+
+.cart-icon {
+    width: 22px;
+    height: 22px;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #7684ab;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
 }
 
 /* Login Button */
 .login-button {
     display: flex;
     align-items: center;
-    background: #413f3d;
+    background: #d5e0e9;
     color: white;
-    padding: 8px 15px;
-    border-radius: 20px;
+    padding: 10px 20px;
+    border-radius: 30px;
     text-decoration: none;
-    font-weight: bold;
-    transition: background 0.3s ease, transform 0.2s ease;
-    position: relative;
-    overflow: hidden;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(77, 171, 247, 0.3);
 }
 
-/* Hover Effect - Login */
 .login-button:hover {
-    background: #3b3a39;
-    transform: scale(1.05);
+    background: #339af0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(77, 171, 247, 0.3);
 }
 
 .login-icon {
-    width: 25px;
-    height: 25px;
-    margin-right: 5px;
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
 }
 
-/* Hero Section */
-.hero-section {
-    text-align: center;
-    padding: 80px 20px;
-    background: linear-gradient(135deg, #3e3d3c, #1f1d1d);
-    color: white;
-}
-
-.hero-section h1 {
-    font-size: 36px;
-    margin-bottom: 10px;
-}
-
-.hero-buttons .btn {
-    display: inline-block;
-    margin: 15px;
-    padding: 12px 24px;
-    background: white;
-    color: #403c3b;
-    font-weight: bold;
-    text-decoration: none;
-    border-radius: 30px;
-    transition: background 0.3s, color 0.3s;
-    border: 2px solid #3a3837;
-}
-
-.hero-buttons .btn:hover {
-    background: #615e5d;
-    color: white;
-}
-
-/* Categories */
-.categories {
-    text-align: center;
-    padding: 40px 20px;
-}
-
-.category-list {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.category-item {
-    padding: 15px 25px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: transform 0.3s, background 0.3s;
-}
-
-.category-item:hover {
-    transform: translateY(-5px);
-    background: #868584;
-    color: white;
-}
-
-/* Offers Section */
-.offers {
-    text-align: center;
-    padding: 40px 20px;
-    background: #f8f9fa;
-}
-
-.offers h2 {
-    color: #333;
-}
-
-/* User Profile (After Login) */
+/* User Profile */
 .user-container {
     position: relative;
     cursor: pointer;
 }
 
-/* Circular Profile Icon with Initials */
 .profile-icon {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
-    background-color: #007bff;
+    background: linear-gradient(135deg, #4dabf7, #228be6);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    font-weight: bold;
-    text-transform: uppercase;
-    transition: background 0.3s ease;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Hover Effect */
 .profile-icon:hover {
-    background-color: #0056b3;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Dropdown Menu */
 .dropdown-menu {
     position: absolute;
-    top: 50px;
+    top: 55px;
     right: 0;
     background-color: white;
-    border: 1px solid #ddd;
-    padding: 10px;
-    border-radius: 5px;
-    width: 160px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+    padding: 15px;
+    border-radius: 12px;
+    width: 200px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
     opacity: 0;
     transform: translateY(-10px);
     visibility: hidden;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    text-align: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 100;
 }
 
-/* Show Dropdown */
 .user-container:hover .dropdown-menu {
     opacity: 1;
     transform: translateY(0);
     visibility: visible;
 }
 
-/* Welcome Text */
 .dropdown-menu p {
-    margin: 0;
-    font-weight: bold;
-    font-size: 16px;
-    color: #333;
-    padding-bottom: 5px;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+    font-size: 15px;
+    color: #343a40;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f3f5;
 }
 
-/* Logout Button */
 .dropdown-menu button {
     width: 100%;
-    background-color: #585656;
+    background-color: #f8f9fa;
+    color: #495057;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    margin-top: 8px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.dropdown-menu button:hover {
+    background-color: #545555;
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Hero Section */
+.hero-section {
+    text-align: center;
+    padding: 120px 5% 100px;
+    background: linear-gradient(135deg, #404141, #181919);
+    color: white;
+    margin-bottom: 40px;
+}
+
+.hero-section h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-section p {
+    font-size: 18px;
+    margin-bottom: 40px;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.hero-buttons .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 30px;
+    background: white;
+    color: #3c3c3d;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
+}
+
+.hero-buttons .btn:hover {
+    background: #f8f9fa;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Categories Section */
+.categories {
+    text-align: center;
+    padding: 60px 5%;
+    background-color: white;
+    margin-bottom: 40px;
+}
+
+.categories h2 {
+    font-size: 36px;
+    margin-bottom: 40px;
+    color: #343a40;
+    font-weight: 700;
+}
+
+.category-list {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.category-item {
+    flex: 1;
+    min-width: 220px;
+    max-width: 280px;
+    padding: 25px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid #e9ecef;
+    text-align: center;
+}
+
+.category-item:hover {
+    transform: translateY(-10px);
+    background: #f8f9fa;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    border-color: #dbe4ff;
+}
+
+.category-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+.category-item:hover img {
+    transform: scale(1.1);
+}
+
+.category-item {
+    font-weight: 600;
+    color: #495057;
+    font-size: 16px;
+}
+
+/* Offers Section */
+.offers {
+    text-align: center;
+    padding: 80px 5%;
+    background: linear-gradient(135deg, #a3a4a4, #ececee);
+    margin-bottom: 40px;
+    border-radius: 16px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.offers-content {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+.offers-content:hover {
+    transform: scale(1.02);
+}
+
+.offers h2 {
+    font-size: 36px;
+    color: #343a40;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.offers p {
+    font-size: 18px;
+    color: #6c757d;
+    margin-bottom: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.view-offers-btn {
+    background: #474747;
     color: white;
     border: none;
-    padding: 10px;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 16px;
     cursor: pointer;
-    margin-top: 5px;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: bold;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(77, 171, 247, 0.3);
 }
 
-/* Hover Effect for Logout */
-.dropdown-menu button:hover {
-    background-color: #555454;
+.view-offers-btn:hover {
+    background: #6d6e6e;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(77, 171, 247, 0.4);
 }
 
-/* Bottom Navigation */
+/* Footer Navigation */
 .bottom-nav {
     display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-    background-color: #222;
+    justify-content: center;
+    padding: 25px 5%;
+    background-color: #343a40;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    gap: 40px;
+    flex-wrap: wrap;
 }
 
 .bottom-nav-item {
-    color: white;
+    color: #adb5bd;
     text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s ease;
+    font-weight: 500;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    padding: 8px 12px;
+    border-radius: 6px;
 }
 
 .bottom-nav-item:hover {
-    color: #ffcc00;
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .navbar {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .nav-left, .nav-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .search-bar {
+        width: 200px;
+    }
+    
+    .hero-section h1 {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 80px 20px;
+    }
+    
+    .hero-section h1 {
+        font-size: 32px;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .category-list {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .category-item {
+        max-width: 100%;
+        width: 100%;
+    }
+    
+    .bottom-nav {
+        gap: 20px;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .search-bar {
+        width: 150px;
+        padding: 10px 15px 10px 35px;
+    }
+    
+    .hero-section h1 {
+        font-size: 28px;
+    }
+    
+    .hero-section p {
+        font-size: 16px;
+    }
+    
+    .categories h2, .offers h2 {
+        font-size: 28px;
+    }
 }

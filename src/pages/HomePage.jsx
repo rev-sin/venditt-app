@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth, db } from "../firebaseConfig";
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import SplashScreen from "../components/SplashScreen";
 
 import loginIcon from "../assets/login-icon.png";
 import logoImage from "../assets/venditt-logo.png";
-
+import cartIcon from "../assets/cart-image.png";
 import "../styles/HomePage.css";
 
 function HomePage() {
@@ -20,87 +20,157 @@ function HomePage() {
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loadingLocation, setLoadingLocation] = useState(true);
+  const [cartItemCount, setCartItemCount] = useState(0);
   const navigate = useNavigate();
 
+  // Categories data
+  const categories = [
+    {
+      name: "Snacks",
+      image: "/assets/snacks.jpg",
+      path: "/products?category=snacks",
+    },
+    {
+      name: "Drinks",
+      image: "/assets/drinks.jpg",
+      path: "/products?category=drinks",
+    },
+    {
+      name: "Ice Cream",
+      image: "/assets/icecream.jpg",
+      path: "/products?category=icecream",
+    },
+    {
+      name: "Healthy Options",
+      image: "/assets/healthy.jpg",
+      path: "/products?category=healthy",
+    },
+  ];
+
+  // Handle splash screen timeout
   useEffect(() => {
     if (showSplash) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setShowSplash(false);
         localStorage.setItem("visited", "true");
       }, 3000);
+      return () => clearTimeout(timer);
     }
   }, [showSplash]);
 
+  // Auth state listener and cart subscription
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (loggedInUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (loggedInUser) => {
       if (loggedInUser) {
         setUser(loggedInUser);
-        const userDoc = await getDoc(doc(db, "users", loggedInUser.uid));
-        if (userDoc.exists()) {
-          setUsername(userDoc.data().name);
+        try {
+          // Get user data
+          const userDoc = await getDoc(doc(db, "users", loggedInUser.uid));
+          if (userDoc.exists()) {
+            setUsername(userDoc.data().name);
+          }
+
+          // Subscribe to cart updates
+          const cartRef = doc(db, "carts", loggedInUser.uid);
+          const unsubscribeCart = onSnapshot(cartRef, (cartDoc) => {
+            if (cartDoc.exists()) {
+              const cartData = cartDoc.data();
+              const itemCount =
+                cartData.items?.reduce(
+                  (total, item) => total + item.quantity,
+                  0
+                ) || 0;
+              setCartItemCount(itemCount);
+            } else {
+              setCartItemCount(0);
+            }
+          });
+
+          return () => unsubscribeCart();
+        } catch (error) {
+          console.error("Error fetching user data:", error);
         }
       } else {
         setUser(null);
         setUsername("");
+        setCartItemCount(0);
       }
     });
 
-    return () => unsubscribe();
+    return () => unsubscribeAuth();
   }, []);
 
+  // Fetch user location
   useEffect(() => {
     const fetchLocation = async () => {
+      setLoadingLocation(true);
       const storedLocation = localStorage.getItem("selectedLocation");
+
       if (storedLocation) {
         setCurrentLocation(storedLocation);
+        setLoadingLocation(false);
         return;
       }
 
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-
             try {
+              const { latitude: lat, longitude: lng } = position.coords;
               const response = await fetch(
                 `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyD6oR6e-7GCylEFsGhv5LZqQMB27N28j38`
               );
               const data = await response.json();
 
               if (data.status === "OK" && data.results.length > 0) {
-                const formattedAddress = data.results[0].formatted_address;
-                setCurrentLocation(formattedAddress);
-                localStorage.setItem("selectedLocation", formattedAddress);
+                const address = data.results[0].formatted_address;
+                setCurrentLocation(address);
+                localStorage.setItem("selectedLocation", address);
               } else {
                 setCurrentLocation("Location not found");
               }
             } catch (error) {
+              console.error("Geocoding error:", error);
               setCurrentLocation("Error fetching location");
-              console.log(error);
+            } finally {
+              setLoadingLocation(false);
             }
           },
           (error) => {
+            console.error("Geolocation error:", error);
             setCurrentLocation("Location access denied");
-            console.log(error);
-          }
+            setLoadingLocation(false);
+          },
+          { timeout: 10000 }
         );
       } else {
         setCurrentLocation("Geolocation not supported");
+        setLoadingLocation(false);
       }
     };
-
     fetchLocation();
   }, []);
 
   const handleLogout = async () => {
-    await signOut(auth);
-    setUser(null);
-    navigate("/");
+    try {
+      await signOut(auth);
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   const handleLocationClick = () => {
     navigate("/location");
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
 
   if (showSplash) {
@@ -111,17 +181,41 @@ function HomePage() {
     <div className="home-container">
       <nav className="navbar">
         <div className="nav-left">
-          <img src={logoImage} alt="Venditt Logo" className="logo" />
-          <div className="location" onClick={handleLocationClick}>
+          <Link to="/">
+            <img src={logoImage} alt="Venditt Logo" className="logo" />
+          </Link>
+          <div
+            className={`location ${loadingLocation ? "loading" : ""}`}
+            onClick={handleLocationClick}
+          >
             <span className="location-icon">📍</span>
-            <span className="current-location">{currentLocation}</span>
+            <span className="current-location">
+              {loadingLocation ? "Locating..." : currentLocation}
+            </span>
           </div>
         </div>
 
         <div className="nav-right">
-          <input type="text" className="search-bar" placeholder="Search..." />
+          <form onSubmit={handleSearch} className="search-form">
+            <div className="search-container">
+              <input
+                type="text"
+                className="search-bar"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button type="submit" className="search-button">
+                Search
+              </button>
+            </div>
+          </form>
+
           <Link to="/cart" className="cart-button">
-            <img alt="Cart" className="cart-icon" />
+            <img src={cartIcon} alt="Cart" className="cart-icon" />
+            {cartItemCount > 0 && (
+              <span className="cart-badge">{cartItemCount}</span>
+            )}
           </Link>
 
           <div
@@ -136,9 +230,12 @@ function HomePage() {
                 </div>
                 {showDropdown && (
                   <div className="dropdown-menu">
-                    <p>Welcome, {username ? username : "User"} 👋</p>
+                    <p>Welcome, {username || "User"} 👋</p>
                     <button onClick={() => navigate("/profile")}>
                       Profile
+                    </button>
+                    <button onClick={() => navigate("/orders")}>
+                      My Orders
                     </button>
                     <button onClick={handleLogout}>Logout</button>
                   </div>
@@ -167,43 +264,45 @@ function HomePage() {
       </header>
 
       <section className="categories">
-        <h2>What’s on your mind?</h2>
+        <h2>What's on your mind?</h2>
         <div className="category-list">
-          <div className="category-item hover-effect">
-            <img src="/assets/snacks.jpg" alt="Snacks" />
-            Snacks
-          </div>
-          <div className="category-item hover-effect">
-            <img src="/assets/drinks.jpg" alt="Drinks" />
-            Drinks
-          </div>
-          <div className="category-item hover-effect">
-            <img src="/assets/icecream.jpg" alt="Ice Cream" />
-            Ice Cream
-          </div>
-          <div className="category-item hover-effect">
-            <img src="/assets/healthy.jpg" alt="Healthy Options" />
-            Healthy Options
-          </div>
+          {categories.map((category, index) => (
+            <Link
+              to={category.path}
+              key={index}
+              className="category-item hover-effect"
+            >
+              <img src={category.image} alt={category.name} />
+              {category.name}
+            </Link>
+          ))}
         </div>
       </section>
 
-      <section
-        className="offers"
-        onClick={() => (window.location.href = "/offers")}
-      >
-        <h2>Top Deals for You</h2>
-        <p>Save more on your favorite vending options.</p>
+      <section className="offers">
+        <div className="offers-content" onClick={() => navigate("/offers")}>
+          <h2>Top Deals for You</h2>
+          <p>Save more on your favorite vending options.</p>
+          <button className="view-offers-btn">View All Offers</button>
+        </div>
       </section>
 
-      <nav className="bottom-nav">
+      <div className="after-offers-spacing"></div>
+
+      <footer className="bottom-nav">
         <Link to="/profile" className="bottom-nav-item">
           Profile
         </Link>
-        <Link to="/history" className="bottom-nav-item">
-          History
+        <Link to="/orders" className="bottom-nav-item">
+          Orders
         </Link>
-      </nav>
+        <Link to="/support" className="bottom-nav-item">
+          Support
+        </Link>
+        <Link to="/about" className="bottom-nav-item">
+          About Us
+        </Link>
+      </footer>
     </div>
   );
 }
