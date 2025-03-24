@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, addDoc, collection } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
@@ -167,6 +167,26 @@ const Cart = () => {
         removeCoupon();
       }
     }
+  };
+
+  const handleProceedToPayment = async () => {
+    const ordersCollectionRef = collection(db, "orders");
+    await addDoc(ordersCollectionRef, {
+      items: cartItems,
+      totalPrice,
+      discount,
+      finalAmount,
+      createdAt: new Date(),
+      userId: userId,
+    });
+
+    const cartRef = doc(db, "carts", userId);
+    await updateDoc(cartRef, {
+      items: [],
+    });
+
+    setCartItems([]);
+    navigate("/payment");
   };
 
   const totalPrice = cartItems.reduce(
@@ -364,7 +384,7 @@ const Cart = () => {
 
             <button
               className="bg-green-600 text-white w-full py-4 rounded-lg mt-6 shadow-md hover:bg-green-700 transition"
-              onClick={() => navigate("/payment")}
+              onClick={handleProceedToPayment}
             >
               Proceed to Payment
             </button>

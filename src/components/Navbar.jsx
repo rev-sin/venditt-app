@@ -18,17 +18,17 @@ function Navbar() {
           >
             Locate
           </Link>
-          <Link
+          {/* <Link
             className="text-gray-300 hover:text-white transition duration-300"
             to="/offers"
           >
             Offers
-          </Link>
+          </Link> */}
           <Link
             className="text-gray-300 hover:text-white transition duration-300"
-            to="/history"
+            to="/orders"
           >
-            History
+            Orders
           </Link>
           <Link
             className="text-gray-300 hover:text-white transition duration-300"
