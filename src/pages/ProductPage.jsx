@@ -10,7 +10,7 @@ import {
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../firebaseConfig";
 import Card from "../components/Card";
-import SkeletonCard from "../components/SkeletonCard"; // Import your SkeletonCard component
+import SkeletonCard from "../components/SkeletonCard";
 
 const ProductPage = () => {
   const [products, setProducts] = useState([]);
@@ -20,7 +20,8 @@ const ProductPage = () => {
   const [userId, setUserId] = useState("");
   const [quantities, setQuantities] = useState({});
   const [cartItems, setCartItems] = useState({});
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     const auth = getAuth();
@@ -37,16 +38,15 @@ const ProductPage = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      setLoading(true); // Set loading to true before fetching data
+      setLoading(true);
       const querySnapshot = await getDocs(collection(db, "products"));
       const productsList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(productsList);
       setProducts(productsList);
       setFilteredProducts(productsList);
-      setLoading(false); // Set loading to false after data is fetched
+      setLoading(false);
     };
 
     const fetchCategories = async () => {
@@ -163,7 +163,6 @@ const ProductPage = () => {
         userId: userId,
       });
     } else {
-      // Create new cart
       await setDoc(cartRef, {
         items: [
           {
@@ -181,8 +180,6 @@ const ProductPage = () => {
       ...prevCartItems,
       [product.id]: true,
     }));
-
-    console.log("Added to cart:", product);
   };
 
   const removeFromCart = async (productId) => {
@@ -218,55 +215,151 @@ const ProductPage = () => {
         delete newQuantities[productId];
         return newQuantities;
       });
-
-      console.log("Removed from cart:", productId);
     }
   };
 
   return (
-    <div className="container mx-auto p-4 flex flex-col md:flex-row">
-      <div className="w-full md:w-1/4 p-4">
-        <h2 className="text-2xl font-bold mb-4">Filters</h2>
-        <div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Mobile Filter Toggle */}
+        <div className="md:hidden mb-6">
           <button
-            className={`block w-full text-left p-2 mb-2 ${
-              selectedCategory === "" ? "bg-gray-200" : ""
-            }`}
-            onClick={() => setSelectedCategory("")}
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className="flex items-center justify-between w-full px-4 py-3 bg-white rounded-lg shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            All
-          </button>
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              className={`block w-full text-left p-2 mb-2 ${
-                selectedCategory === category.id ? "bg-gray-200" : ""
+            <span className="font-medium text-gray-700">
+              {isFilterOpen ? 'Hide Filters' : 'Show Filters'}
+            </span>
+            <svg
+              className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                isFilterOpen ? 'rotate-180' : ''
               }`}
-              onClick={() => setSelectedCategory(category.id)}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              {category.name}
-            </button>
-          ))}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
         </div>
-      </div>
-      <div className="w-full md:w-3/4 p-4">
-        <h1 className="text-3xl font-bold mb-4">Products</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {loading
-            ? Array.from({ length: 8 }).map((_, index) => (
-                <SkeletonCard key={index} />
-              ))
-            : filteredProducts.map((product) => (
-                <Card
-                  key={product.id}
-                  product={product}
-                  quantities={quantities}
-                  cartItems={cartItems}
-                  handleQuantityChange={handleQuantityChange}
-                  addToCart={addToCart}
-                  removeFromCart={removeFromCart}
-                />
-              ))}
+
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Filters Sidebar */}
+          <div
+            className={`${
+              isFilterOpen ? 'block' : 'hidden'
+            } md:block w-full md:w-72 bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-fit sticky top-6 transition-all duration-300`}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-800">Filters</h2>
+              <button
+                onClick={() => setSelectedCategory("")}
+                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+              >
+                Clear all
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-medium text-gray-700">Categories</h3>
+              <div className="space-y-2">
+                <button
+                  className={`w-full text-left px-4 py-2 rounded-lg transition-colors duration-200 ${
+                    selectedCategory === ""
+                      ? 'bg-primary-100 text-primary-700 font-medium'
+                      : 'hover:bg-gray-50 text-gray-600'
+                  }`}
+                  onClick={() => setSelectedCategory("")}
+                >
+                  All Categories
+                </button>
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    className={`w-full text-left px-4 py-2 rounded-lg transition-colors duration-200 ${
+                      selectedCategory === category.id
+                        ? 'bg-primary-100 text-primary-700 font-medium'
+                        : 'hover:bg-gray-50 text-gray-600'
+                    }`}
+                    onClick={() => setSelectedCategory(category.id)}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Products Grid */}
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                {selectedCategory
+                  ? categories.find((c) => c.id === selectedCategory)?.name + ' Products'
+                  : 'All Products'}
+              </h1>
+              <p className="text-sm text-gray-500">
+                Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'}
+              </p>
+            </div>
+
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <SkeletonCard key={index} />
+                ))}
+              </div>
+            ) : filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredProducts.map((product) => (
+                  <Card
+                    key={product.id}
+                    product={product}
+                    quantities={quantities}
+                    cartItems={cartItems}
+                    handleQuantityChange={handleQuantityChange}
+                    addToCart={addToCart}
+                    removeFromCart={removeFromCart}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+                <svg
+                  className="mx-auto h-12 w-12 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <h3 className="mt-4 text-lg font-medium text-gray-900">
+                  No products found
+                </h3>
+                <p className="mt-2 text-gray-500">
+                  We couldn't find any products matching your selection.
+                </p>
+                <button
+                  onClick={() => setSelectedCategory("")}
+                  className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                >
+                  Clear filters
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
