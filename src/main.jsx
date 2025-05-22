@@ -4,7 +4,9 @@ import App from "./App";
 import { BrowserRouter as Router } from "react-router-dom";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <Router>  {/* ✅ The only Router should be here */}
+  <Router>
+    {" "}
+    {/* ✅ The only Router should be here */}
     <App />
   </Router>
 );
